@@ -5,6 +5,9 @@ interface BreachData {
   dpcScore: number;
   eiScore: number;
   cbScore: number;
+  businessSector: string;
+  affectedCount: number;
+  selectedDataTypes: string[];
 }
 
 export async function POST(request: NextRequest) {
@@ -14,25 +17,43 @@ export async function POST(request: NextRequest) {
     // Calculate final score
     const finalScore = (data.dpcScore * data.eiScore) + data.cbScore;
     
-    // Determine risk level
+    // Enhanced risk level determination based on ENISA methodology
     let riskLevel: string;
     let notifications: string[] = [];
+    const hasSpecialCategories = data.selectedDataTypes.includes('sensitive');
+    const criticalSectors = ['healthcare', 'finance', 'energy', 'transport', 'digital_infra', 'public_admin'];
+    const isNIS2Sector = criticalSectors.includes(data.businessSector);
     
-    if (finalScore <= 1) {
+    // ENISA-compliant risk assessment
+    if (finalScore <= 1 && !hasSpecialCategories) {
       riskLevel = 'Low';
-      notifications = ['Keep an internal record of what happened (required by GDPR Article 33)'];
+      notifications = ['Document the breach internally (GDPR Article 33(5))'];
     } else if (finalScore <= 2) {
       riskLevel = 'Medium';
-      notifications = ['Report to your Data Protection Authority (the government office that handles privacy)'];
+      notifications = ['Notify Data Protection Authority within 72 hours (GDPR Article 33)'];
     } else if (finalScore <= 3) {
       riskLevel = 'High';
-      notifications = ['Report to your Data Protection Authority (the government office that handles privacy)'];
+      notifications = [
+        'Notify Data Protection Authority within 72 hours (GDPR Article 33)',
+        'Consider notifying affected individuals if high risk to rights and freedoms'
+      ];
     } else {
       riskLevel = 'Very High';
       notifications = [
-        'Report to your Data Protection Authority (the government office that handles privacy)',
-        'Notify the people whose information was involved in the breach'
+        'Immediately notify Data Protection Authority (GDPR Article 33)',
+        'Notify affected individuals without undue delay (GDPR Article 34)',
+        'Prepare detailed breach documentation'
       ];
+    }
+
+    // Add NIS2 requirements for regulated sectors
+    if (isNIS2Sector && (riskLevel === 'High' || riskLevel === 'Very High')) {
+      notifications.push('Report to national CSIRT/competent authority (NIS2 Directive)');
+    }
+
+    // Additional requirements for special categories
+    if (hasSpecialCategories && riskLevel !== 'Low') {
+      notifications.push('Enhanced documentation required for special category data');
     }
     
     return NextResponse.json({
@@ -43,7 +64,11 @@ export async function POST(request: NextRequest) {
         notifications,
         dpcScore: data.dpcScore,
         eiScore: data.eiScore,
-        cbScore: data.cbScore
+        cbScore: data.cbScore,
+        businessSector: data.businessSector,
+        affectedCount: data.affectedCount,
+        hasSpecialCategories,
+        isNIS2Sector
       }
     });
   } catch (error) {
