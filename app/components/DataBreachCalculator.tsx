@@ -281,7 +281,7 @@ const DataBreachCalculator = () => {
         'Phone call records',
         'App usage patterns'
       ],
-      baseScore: 1,
+      baseScore: 2,
       gdprCategory: 'Personal Data (Art. 4(1))'
     },
     {
@@ -314,7 +314,7 @@ const DataBreachCalculator = () => {
         'Biometric data',
         'Genetic data'
       ],
-      baseScore: 1,
+      baseScore: 4,
       gdprCategory: 'Special Categories (Art. 9)'
     }
   ];
@@ -323,78 +323,123 @@ const DataBreachCalculator = () => {
   const dataTypeQuestions: DataTypeQuestions = {
     basic_personal: [
       {
-        id: 'basic_personal_risk_level',
-        question: 'What level of risk does this basic personal information present?',
-        explanation: 'Consider how the information could be used and who might be affected.',
+        id: 'basic_profiling',
+        question: 'Could someone use this basic information to figure out lifestyle or financial situation?',
+        explanation: 'Even basic info can reveal a lot when combined together.',
         examples: [
-          'Low risk: Just names and phone numbers',
-          'Medium risk: Combined info that reveals lifestyle (expensive address + car)',
-          'High risk: Info that hints at sensitive matters (religious/political affiliations)',
-          'Very high risk: Children involved or vulnerable individuals at risk'
+          '✓ Expensive home address + luxury car registration',
+          '✓ Private school records + exclusive club membership',
+          '✗ Just a name and phone number'
         ],
-        scores: {
-          'low': 0.25,
-          'medium': 0.5,
-          'high': 0.75,
-          'very_high': 1.0
-        }
+        modifier: 1
+      },
+      {
+        id: 'basic_sensitive_assumptions',
+        question: 'Could someone guess sensitive things from this basic information?',
+        explanation: 'Sometimes basic info can hint at very private matters.',
+        examples: [
+          '✓ Membership in religious organizations',
+          '✓ Donations to political causes',
+          '✗ Just your work email'
+        ],
+        modifier: 2
+      },
+      {
+        id: 'basic_vulnerable',
+        question: 'Are children involved, or could this information put someone in danger?',
+        explanation: 'Some people need extra protection, especially children.',
+        examples: [
+          '✓ School records with children\'s names',
+          '✓ Information about abuse victims',
+          '✗ Adult employee directory'
+        ],
+        modifier: 3
       }
     ],
     behavioral: [
       {
-        id: 'behavioral_risk_level',
-        question: 'What level of risk does this behavioral data present?',
-        explanation: 'Consider how detailed the behavioral patterns are and what they might reveal.',
+        id: 'behavioral_profile',
+        question: 'Could someone build a detailed picture of daily life from this data?',
+        explanation: 'Lots of behavior data can reveal very personal details.',
         examples: [
-          'Low risk: Limited behavioral data (single location visit)',
-          'Medium risk: General patterns (shopping habits, basic location data)',
-          'High risk: Detailed life patterns (complete daily tracking, all purchases)',
-          'Very high risk: Reveals health/relationships (medical visits, dating patterns)'
+          '✓ Complete daily location tracking',
+          '✓ All purchases and shopping patterns',
+          '✗ Just one location visit'
         ],
-        scores: {
-          'low': 0.25,
-          'medium': 0.5,
-          'high': 0.75,
-          'very_high': 1.0
-        }
+        modifier: 1
+      },
+      {
+        id: 'behavioral_sensitive',
+        question: 'Could this behavior data reveal health issues or personal relationships?',
+        explanation: 'Sometimes behavior patterns reveal private aspects of life.',
+        examples: [
+          '✓ Frequent visits to medical specialists',
+          '✓ Dating app usage patterns',
+          '✗ General shopping patterns'
+        ],
+        modifier: 2
       }
     ],
     financial: [
       {
-        id: 'financial_risk_level',
-        question: 'What level of financial information was exposed?',
-        explanation: 'Consider how much financial detail was revealed and its potential for misuse.',
+        id: 'financial_minimal',
+        question: 'Was only minimal financial information exposed (like knowing where someone banks)?',
+        explanation: 'Just knowing someone has an account somewhere, without actual access details.',
         examples: [
-          'Low risk: Minimal info (just knowing where someone banks)',
-          'Medium risk: Partial info (last 4 digits, expired cards)',
-          'High risk: Significant info but incomplete (account without routing)',
-          'Very high risk: Complete info enabling fraud (full card details, banking credentials)'
+          '✓ Just knowing someone banks at Chase',
+          '✓ Just knowing someone has a credit card',
+          '✓ Loyalty card numbers',
+          '✗ Actual account numbers'
         ],
-        scores: {
-          'low': 0.25,
-          'medium': 0.5,
-          'high': 0.75,
-          'very_high': 1.0
-        }
+        modifier: -2
+      },
+      {
+        id: 'financial_partial',
+        question: 'Was partial financial information exposed that alone cannot be used for fraud?',
+        explanation: 'Some financial details but missing critical pieces needed for access.',
+        examples: [
+          '✓ Last 4 digits of credit card',
+          '✓ Account number without routing number',
+          '✓ Expired credit card numbers',
+          '✗ Complete account access information'
+        ],
+        modifier: -1
+      },
+      {
+        id: 'financial_complete',
+        question: 'Was complete financial information exposed that could enable fraud or theft?',
+        explanation: 'All information needed to access accounts or make fraudulent transactions.',
+        examples: [
+          '✓ Full credit card with CVV and expiry',
+          '✓ Bank account with routing number',
+          '✓ Online banking credentials',
+          '✓ Payment app login details'
+        ],
+        modifier: 1
       }
     ],
     sensitive: [
       {
-        id: 'sensitive_risk_level',
-        question: 'What level of sensitive personal data was exposed?',
-        explanation: 'Consider how specific and potentially harmful the sensitive information is.',
+        id: 'sensitive_general',
+        question: 'Does this sensitive information only give general hints?',
+        explanation: 'The information is sensitive but not specific.',
         examples: [
-          'Low risk: General hints only (visited hospital, attended service)',
-          'Medium risk: Some specific details but limited scope',
-          'High risk: Detailed sensitive information (medical conditions, beliefs)',
-          'Very high risk: Highly specific private details (therapy notes, genetic data)'
+          '✓ Knowing someone visited a hospital',
+          '✓ Knowing someone attended religious service',
+          '✗ Specific medical diagnoses'
         ],
-        scores: {
-          'low': 0.25,
-          'medium': 0.5,
-          'high': 0.75,
-          'very_high': 1.0
-        }
+        modifier: -2
+      },
+      {
+        id: 'sensitive_specific',
+        question: 'Does this reveal specific private details?',
+        explanation: 'Detailed sensitive information that could be harmful.',
+        examples: [
+          '✓ Specific medical diagnoses',
+          '✓ Detailed therapy notes',
+          '✗ Just knowing someone went to a doctor'
+        ],
+        modifier: 1
       }
     ]
   };
@@ -636,11 +681,6 @@ const DataBreachCalculator = () => {
       if (dataType) {
         dpc += dataType.baseScore;
 
-        // Apply ENISA base scoring adjustments
-        if (dataType.id === 'sensitive') {
-          dpc += 3; // Sensitive data gets significant base increase per ENISA
-        }
-        
         // Add sector-specific modifiers
         if (businessSector === 'healthcare' && dataType.id === 'sensitive') {
           dpc += 1; // Healthcare breaches with medical data are more severe
@@ -649,18 +689,10 @@ const DataBreachCalculator = () => {
           dpc += 1; // Financial sector breaches with financial data are critical
         }
 
-        // Add contextual adjustments from data type specific questions
+        // Add modifiers from data type specific questions
         const questions = dataTypeQuestions[typeId] || [];
         questions.forEach(q => {
-          if ('scores' in q && q.scores && typeof q.scores === 'object') {
-            const selectedOption = responses[q.id];
-            if (selectedOption && selectedOption in q.scores) {
-              const scoreValue = q.scores[selectedOption as keyof typeof q.scores];
-              // Convert matrix score to contextual adjustment: 0.25=0, 0.5=1, 0.75=2, 1.0=3
-              const adjustment = Math.round((scoreValue - 0.25) / 0.25);
-              dpc += adjustment;
-            }
-          } else if ('modifier' in q && q.modifier && responses[q.id] === 'yes') {
+          if (responses[q.id] === 'yes' && q.modifier) {
             dpc += q.modifier;
           }
         });
@@ -696,7 +728,9 @@ const DataBreachCalculator = () => {
           ei = q.scores[selectedOption as keyof typeof q.scores];
         }
       } else if ('score' in q && q.score !== undefined && responses[q.id] === 'yes') {
-        ei = q.score;
+        if (typeof q.score === 'number') {
+          ei = q.score;
+        }
       }
     });
 
@@ -840,7 +874,7 @@ const DataBreachCalculator = () => {
           } else {
             const unansweredQuestions = questions.filter(q => responses[q.id] === undefined);
             if (unansweredQuestions.length > 0) {
-              message = `Please answer the question about ${dataTypeName} to continue.`;
+              message = `Please answer all questions about ${dataTypeName} to continue.`;
             } else {
               canProceed = true;
             }
@@ -964,13 +998,6 @@ const DataBreachCalculator = () => {
                 moderately_difficult: 'Moderately difficult to identify (0.5)',
                 somewhat_easy: 'Somewhat easy to identify (0.75)',
                 very_easy: 'Very easy to identify (1.0)'
-              }[optionKey] || optionKey;
-            } else if (questionId.endsWith('_risk_level')) {
-              return {
-                low: 'Low risk (0.25)',
-                medium: 'Medium risk (0.5)',
-                high: 'High risk (0.75)',
-                very_high: 'Very high risk (1.0)'
               }[optionKey] || optionKey;
             }
             return optionKey;
@@ -1220,12 +1247,10 @@ const DataBreachCalculator = () => {
             {questions.length > 0 ? (
               <div>
                 <p className="text-gray-600 mb-6">
-                  Answer this question to help us better assess the risk for this type of data.
+                  Answer these questions to help us better assess the risk for this type of data.
                 </p>
                 {questions.map((q: Question) => (
-                  'scores' in q && q.scores && typeof q.scores === 'object' ? 
-                    <MultiChoiceCard key={q.id} question={q} /> :
-                    <QuestionCard key={q.id} question={q} />
+                  <QuestionCard key={q.id} question={q} />
                 ))}
               </div>
             ) : (
@@ -1314,97 +1339,11 @@ const DataBreachCalculator = () => {
               </h2>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div className="text-center mb-4">
+                <div className="text-center">
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">ENISA Score Calculation</h3>
                   <p className="text-blue-800 text-sm mb-3">SE = DPC × EI + CB</p>
                   <div className="text-2xl font-bold text-blue-900">
                     Final Score: {finalScore.toFixed(2)}
-                  </div>
-                </div>
-                
-                {/* Score Breakdown */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <div className="font-semibold text-blue-900">DPC</div>
-                    <div className="text-lg font-bold text-blue-800">
-                      {(() => {
-                        let dpc = 0;
-                        selectedDataTypes.forEach(typeId => {
-                          const dataType = dataTypes.find(dt => dt.id === typeId);
-                          if (dataType) {
-                            dpc += dataType.baseScore;
-                            if (dataType.id === 'sensitive') dpc += 3;
-                            if (businessSector === 'healthcare' && dataType.id === 'sensitive') dpc += 1;
-                            if (businessSector === 'finance' && dataType.id === 'financial') dpc += 1;
-                            const questions = dataTypeQuestions[typeId] || [];
-                            questions.forEach(q => {
-                              if ('scores' in q && q.scores && typeof q.scores === 'object') {
-                                const selectedOption = responses[q.id];
-                                if (selectedOption && selectedOption in q.scores) {
-                                  const scoreValue = q.scores[selectedOption as keyof typeof q.scores];
-                                  const adjustment = Math.round((scoreValue - 0.25) / 0.25);
-                                  dpc += adjustment;
-                                }
-                              }
-                            });
-                          }
-                        });
-                        const count = parseInt(affectedCount) || 0;
-                        if (count > 100000) dpc += 2;
-                        else if (count > 10000) dpc += 1;
-                        else if (count > 1000) dpc += 0.5;
-                        modifyingFactors.increasing.forEach(q => {
-                          if (responses[q.id] === 'yes') dpc += q.score;
-                        });
-                        modifyingFactors.decreasing.forEach(q => {
-                          if (responses[q.id] === 'yes') dpc += q.score;
-                        });
-                        return Math.max(0, dpc).toFixed(1);
-                      })()}
-                    </div>
-                    <div className="text-xs text-blue-700">Data Processing Context</div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <div className="font-semibold text-blue-900">EI</div>
-                    <div className="text-lg font-bold text-blue-800">
-                      {(() => {
-                        let ei = 0.25;
-                        eiQuestions.forEach(q => {
-                          if ('scores' in q && q.scores && typeof q.scores === 'object') {
-                            const selectedOption = responses[q.id];
-                            if (selectedOption && selectedOption in q.scores) {
-                              ei = q.scores[selectedOption as keyof typeof q.scores];
-                            }
-                          }
-                        });
-                        return ei.toFixed(2);
-                      })()}
-                    </div>
-                    <div className="text-xs text-blue-700">Ease of Identification</div>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg p-3 text-center">
-                    <div className="font-semibold text-blue-900">CB</div>
-                    <div className="text-lg font-bold text-blue-800">
-                      {(() => {
-                        let cb = 0;
-                        cbQuestions.forEach(category => {
-                          category.questions.forEach(q => {
-                            if ('scores' in q && q.scores && typeof q.scores === 'object') {
-                              const selectedOption = responses[q.id];
-                              if (selectedOption && selectedOption in q.scores) {
-                                cb += q.scores[selectedOption as keyof typeof q.scores];
-                              }
-                            } else if ('score' in q && responses[q.id] === 'yes') {
-                              cb += q.score || 0;
-                            }
-                          });
-                        });
-                        return cb.toFixed(2);
-                      })()}
-                    </div>
-                    <div className="text-xs text-blue-700">Circumstances of Breach</div>
                   </div>
                 </div>
               </div>
@@ -1530,72 +1469,6 @@ const DataBreachCalculator = () => {
         </div>
       </div>
 
-      {/* Step Progress */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
-          {steps.map((step, index) => (
-            <div key={index} className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                index <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                {index < currentStep ? '✓' : index + 1}
-              </div>
-              <div className="ml-2 hidden sm:block">
-                <div className={`text-sm font-medium ${index <= currentStep ? 'text-blue-900' : 'text-gray-500'}`}>
-                  {step.title}
-                </div>
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`hidden sm:block w-8 h-0.5 mx-4 ${
-                  index < currentStep ? 'bg-blue-600' : 'bg-gray-200'
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Score Preview (show after step 1) */}
-      {currentStep > 1 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div className="text-center sm:text-left flex-1">
-              <h3 className="text-lg font-semibold text-blue-900">Current Assessment</h3>
-              <div className="text-2xl font-bold text-blue-800 mb-2">Score: {finalScore.toFixed(2)}</div>
-              {selectedDataTypes.length > 0 && (
-                <div className="text-sm text-blue-700">
-                  <span className="font-medium">Data types:</span> {selectedDataTypes.map(id => 
-                    dataTypes.find(dt => dt.id === id)?.name
-                  ).filter(Boolean).join(', ')}
-                </div>
-              )}
-              {businessSector && (
-                <div className="text-sm text-blue-700">
-                  <span className="font-medium">Sector:</span> {businessSectors.find(s => s.id === businessSector)?.name}
-                </div>
-              )}
-              {affectedCount && (
-                <div className="text-sm text-blue-700">
-                  <span className="font-medium">Scale:</span> {
-                    affectedCount === '1' ? '1-10 individuals' :
-                    affectedCount === '50' ? '11-100 individuals' :
-                    affectedCount === '500' ? '101-1,000 individuals' :
-                    affectedCount === '5000' ? '1,001-10,000 individuals' :
-                    affectedCount === '50000' ? '10,001-100,000 individuals' :
-                    affectedCount === '500000' ? 'More than 100,000 individuals' : 
-                    'Unknown'
-                  }
-                </div>
-              )}
-            </div>
-            <div className="text-center sm:text-right">
-              <span className={`px-4 py-2 rounded-lg font-semibold text-sm border ${getRiskColor(riskLevel)}`}>
-                {riskLevel} Risk
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Main Content */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-8 mb-8">
@@ -1609,33 +1482,6 @@ const DataBreachCalculator = () => {
             <AlertTriangle size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
             <p className="text-amber-800">{validationMessage}</p>
           </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      {currentStep === 6 && (
-        <div className="flex justify-center gap-4 mb-6">
-          <button
-            onClick={() => {
-              setCurrentStep(0);
-              setResponses({});
-              setSelectedDataTypes([]);
-              setCurrentDataTypeIndex(0);
-              setBusinessSector('');
-              setAffectedCount('');
-              setBreachScenario({ confidentiality: 0, integrity: 0, availability: 0 });
-              setValidationMessage('');
-            }}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
-          >
-            🔄 Start New Assessment
-          </button>
-          <button
-            onClick={() => downloadBreachReport()}
-            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-          >
-            📄 Download Report
-          </button>
         </div>
       )}
 
