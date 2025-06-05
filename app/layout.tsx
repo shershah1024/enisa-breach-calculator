@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Data Breach Risk Calculator',
-  description: 'Calculate your GDPR data breach risk and required actions',
+  title: 'GDPR Data Breach Risk Calculator',
+  description: 'Calculate your GDPR data breach risk and required actions using ENISA methodology',
 };
 
 export default function RootLayout({

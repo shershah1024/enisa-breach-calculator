@@ -21,8 +21,6 @@ export async function POST(request: NextRequest) {
     let riskLevel: string;
     let notifications: string[] = [];
     const hasSpecialCategories = data.selectedDataTypes.includes('sensitive');
-    const criticalSectors = ['healthcare', 'finance', 'energy', 'transport', 'digital_infra', 'public_admin'];
-    const isNIS2Sector = criticalSectors.includes(data.businessSector);
     
     // ENISA-compliant risk assessment
     if (finalScore <= 1 && !hasSpecialCategories) {
@@ -46,10 +44,6 @@ export async function POST(request: NextRequest) {
       ];
     }
 
-    // Add NIS2 requirements for regulated sectors
-    if (isNIS2Sector && (riskLevel === 'High' || riskLevel === 'Very High')) {
-      notifications.push('Report to national CSIRT/competent authority (NIS2 Directive)');
-    }
 
     // Additional requirements for special categories
     if (hasSpecialCategories && riskLevel !== 'Low') {
@@ -67,8 +61,7 @@ export async function POST(request: NextRequest) {
         cbScore: data.cbScore,
         businessSector: data.businessSector,
         affectedCount: data.affectedCount,
-        hasSpecialCategories,
-        isNIS2Sector
+        hasSpecialCategories
       }
     });
   } catch (error) {

@@ -56,6 +56,7 @@ const DataBreachCalculator = () => {
   const [affectedCount, setAffectedCount] = useState<string>('');
   const [complianceReqs, setComplianceReqs] = useState<ComplianceRequirement | null>(null);
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [editModalOpen, setEditModalOpen] = useState<string | null>(null);
 
   const downloadBreachReport = () => {
     const today = new Date().toLocaleDateString();
@@ -225,10 +226,6 @@ const DataBreachCalculator = () => {
     });
     yPosition += 3;
     
-    const isNIS2 = businessSectors.find(s => s.id === businessSector)?.nis2;
-    addText('NIS2 Directive implications:', 10, true);
-    addCheckbox('Organization subject to NIS2 - separate CSIRT notification required', isNIS2 || false);
-    addCheckbox('Not subject to NIS2 Directive', !isNIS2);
 
     // Declaration
     addSection('DECLARATION');
@@ -258,64 +255,64 @@ const DataBreachCalculator = () => {
       id: 'basic_personal',
       name: 'Basic Personal Information',
       icon: User,
-      description: 'Names, addresses, contact details, basic demographics',
+      description: 'Standard contact details and basic information that most people share regularly',
       examples: [
-        'Names, addresses, phone numbers',
-        'Email addresses',
-        'Job titles, education history',
-        'Family information',
-        'Birth dates'
+        'Full names and addresses',
+        'Email addresses and phone numbers',
+        'Job titles and work history',
+        'Education background',
+        'Basic family details (spouse, children)'
       ],
       baseScore: 1,
-      gdprCategory: 'Personal Data (Art. 4(1))'
+      gdprCategory: 'Standard personal data'
     },
     {
       id: 'behavioral',
-      name: 'Behavior & Habits',
+      name: 'Behavioral Data',
       icon: Activity,
-      description: 'Information about what people do, where they go, or what they like',
+      description: 'Information about personal preferences, habits, and patterns of behavior that can reveal insights about individuals',
       examples: [
-        'GPS location history',
-        'Website browsing history',
-        'Shopping preferences',
-        'Phone call records',
-        'App usage patterns'
+        'Location history and GPS tracking data',
+        'Website visits and search history',
+        'Shopping habits and purchase patterns',
+        'Communication and messaging patterns',
+        'App usage and social media activity'
       ],
       baseScore: 2,
-      gdprCategory: 'Personal Data (Art. 4(1))'
+      gdprCategory: 'Behavioral and preference data'
     },
     {
       id: 'financial',
       name: 'Financial Information',
       icon: CreditCard,
-      description: 'Any information about money, spending, or financial situation',
+      description: 'Any information related to money, payments, or financial status',
       examples: [
-        'Bank account numbers',
-        'Credit card information',
-        'Salary information',
-        'Investment accounts',
-        'Tax records'
+        'Bank account and routing numbers',
+        'Credit card details and CVV codes',
+        'Salary and income information',
+        'Investment and retirement accounts',
+        'Tax returns and financial statements'
       ],
       baseScore: 3,
-      gdprCategory: 'Personal Data (Art. 4(1))'
+      gdprCategory: 'Financial data'
     },
     {
       id: 'sensitive',
-      name: 'Sensitive Personal Data',
+      name: 'Highly Sensitive Information',
       icon: Lock,
-      description: 'Very private information that could harm someone if revealed',
+      description: 'Very private information that could cause serious harm to individuals if exposed',
       examples: [
-        'Medical records',
-        'Mental health information',
-        'Sexual orientation',
-        'Political opinions',
-        'Religious beliefs',
-        'Criminal records',
-        'Biometric data',
-        'Genetic data'
+        'Medical records and health conditions',
+        'Mental health and therapy information',
+        'Sexual orientation and relationships',
+        'Political views and voting records',
+        'Religious beliefs and practices',
+        'Criminal history and legal records',
+        'Fingerprints, face scans, and other biometrics',
+        'DNA and genetic information'
       ],
       baseScore: 4,
-      gdprCategory: 'Special Categories (Art. 9)'
+      gdprCategory: 'Special category data (highest protection required)'
     }
   ];
 
@@ -323,123 +320,58 @@ const DataBreachCalculator = () => {
   const dataTypeQuestions: DataTypeQuestions = {
     basic_personal: [
       {
-        id: 'basic_profiling',
-        question: 'Could someone use this basic information to figure out lifestyle or financial situation?',
-        explanation: 'Even basic info can reveal a lot when combined together.',
-        examples: [
-          '✓ Expensive home address + luxury car registration',
-          '✓ Private school records + exclusive club membership',
-          '✗ Just a name and phone number'
-        ],
-        modifier: 1
-      },
-      {
-        id: 'basic_sensitive_assumptions',
-        question: 'Could someone guess sensitive things from this basic information?',
-        explanation: 'Sometimes basic info can hint at very private matters.',
-        examples: [
-          '✓ Membership in religious organizations',
-          '✓ Donations to political causes',
-          '✗ Just your work email'
-        ],
-        modifier: 2
-      },
-      {
-        id: 'basic_vulnerable',
-        question: 'Are children involved, or could this information put someone in danger?',
-        explanation: 'Some people need extra protection, especially children.',
-        examples: [
-          '✓ School records with children\'s names',
-          '✓ Information about abuse victims',
-          '✗ Adult employee directory'
-        ],
-        modifier: 3
+        id: 'personal_data_level',
+        question: 'What level of personal information was involved in this breach?',
+        explanation: 'Choose the option that best describes the most sensitive level of personal data that was exposed. Even if most data was basic, select the highest level that applies.',
+        examples: [],
+        scores: {
+          'level1': 1,
+          'level2': 2,
+          'level3': 3,
+          'level4': 4
+        }
       }
     ],
     behavioral: [
       {
-        id: 'behavioral_profile',
-        question: 'Could someone build a detailed picture of daily life from this data?',
-        explanation: 'Lots of behavior data can reveal very personal details.',
-        examples: [
-          '✓ Complete daily location tracking',
-          '✓ All purchases and shopping patterns',
-          '✗ Just one location visit'
-        ],
-        modifier: 1
-      },
-      {
-        id: 'behavioral_sensitive',
-        question: 'Could this behavior data reveal health issues or personal relationships?',
-        explanation: 'Sometimes behavior patterns reveal private aspects of life.',
-        examples: [
-          '✓ Frequent visits to medical specialists',
-          '✓ Dating app usage patterns',
-          '✗ General shopping patterns'
-        ],
-        modifier: 2
+        id: 'behavioral_data_level',
+        question: 'What level of behavioral data was involved in this breach?',
+        explanation: 'Choose the option that best describes the most revealing level of behavioral data that was exposed. Consider how much insight this data provides into individuals\' daily lives and habits.',
+        examples: [],
+        scores: {
+          'level1': 1,
+          'level2': 2,
+          'level3': 3,
+          'level4': 4
+        }
       }
     ],
     financial: [
       {
-        id: 'financial_minimal',
-        question: 'Was only minimal financial information exposed (like knowing where someone banks)?',
-        explanation: 'Just knowing someone has an account somewhere, without actual access details.',
-        examples: [
-          '✓ Just knowing someone banks at Chase',
-          '✓ Just knowing someone has a credit card',
-          '✓ Loyalty card numbers',
-          '✗ Actual account numbers'
-        ],
-        modifier: -2
-      },
-      {
-        id: 'financial_partial',
-        question: 'Was partial financial information exposed that alone cannot be used for fraud?',
-        explanation: 'Some financial details but missing critical pieces needed for access.',
-        examples: [
-          '✓ Last 4 digits of credit card',
-          '✓ Account number without routing number',
-          '✓ Expired credit card numbers',
-          '✗ Complete account access information'
-        ],
-        modifier: -1
-      },
-      {
-        id: 'financial_complete',
-        question: 'Was complete financial information exposed that could enable fraud or theft?',
-        explanation: 'All information needed to access accounts or make fraudulent transactions.',
-        examples: [
-          '✓ Full credit card with CVV and expiry',
-          '✓ Bank account with routing number',
-          '✓ Online banking credentials',
-          '✓ Payment app login details'
-        ],
-        modifier: 1
+        id: 'financial_data_level',
+        question: 'What level of financial data was involved in this breach?',
+        explanation: 'Choose the option that best describes the most revealing level of financial information that was exposed. Consider what insights this data provides about individuals\' financial status and whether it could enable fraud.',
+        examples: [],
+        scores: {
+          'level1': 1,
+          'level2': 2,
+          'level3': 3,
+          'level4': 4
+        }
       }
     ],
     sensitive: [
       {
-        id: 'sensitive_general',
-        question: 'Does this sensitive information only give general hints?',
-        explanation: 'The information is sensitive but not specific.',
-        examples: [
-          '✓ Knowing someone visited a hospital',
-          '✓ Knowing someone attended religious service',
-          '✗ Specific medical diagnoses'
-        ],
-        modifier: -2
-      },
-      {
-        id: 'sensitive_specific',
-        question: 'Does this reveal specific private details?',
-        explanation: 'Detailed sensitive information that could be harmful.',
-        examples: [
-          '✓ Specific medical diagnoses',
-          '✓ Detailed therapy notes',
-          '✗ Just knowing someone went to a doctor'
-        ],
-        modifier: 1
+        id: 'sensitive_data_level',
+        question: 'What level of sensitive data was involved in this breach?',
+        explanation: 'Choose the option that best describes the most revealing level of sensitive information that was exposed. Consider how specific the data is and what insights it provides into individuals\' private lives.',
+        examples: [],
+        scores: {
+          'level1': 2,
+          'level2': 3,
+          'level3': 4,
+          'level4': 4
+        }
       }
     ]
   };
@@ -544,17 +476,13 @@ const DataBreachCalculator = () => {
   const cbQuestions = [
     {
       id: 'cb_confidentiality',
-      category: 'Information Got Out',
+      category: 'A1 Loss of confidentiality',
       questions: [
         {
           id: 'cb_confidentiality',
           question: 'How was the information exposed?',
           explanation: 'Choose the option that best describes how confidentiality was affected.',
-          examples: [
-            'Lost/discarded: Laptop lost during shipping, papers in trash',
-            'Shared with known parties: Email sent to wrong group',
-            'Public exposure: Data posted online, published by hackers'
-          ],
+          examples: [],
           scores: {
             lost: 0,
             known: 0.25,
@@ -565,17 +493,13 @@ const DataBreachCalculator = () => {
     },
     {
       id: 'cb_integrity',
-      category: 'Information Was Changed',
+      category: 'A2 Loss of integrity',
       questions: [
         {
           id: 'cb_integrity',
           question: 'What happened to the information integrity?',
           explanation: 'Choose the option that best describes how data integrity was affected.',
-          examples: [
-            'Fixed quickly: Database changed but restored before use',
-            'Used but fixable: Medical records changed, patient needs new appointment',
-            'Permanently altered: Database corrupted with no backup'
-          ],
+          examples: [],
           scores: {
             fixed: 0,
             fixable: 0.25,
@@ -586,17 +510,13 @@ const DataBreachCalculator = () => {
     },
     {
       id: 'cb_availability',
-      category: 'Information Became Unavailable',
+      category: 'A3 Loss of availability',
       questions: [
         {
           id: 'cb_availability',
           question: 'What happened to the information availability?',
           explanation: 'Choose the option that best describes the availability impact.',
-          examples: [
-            'Easily recoverable: One copy lost but others available',
-            'Recoverable with work: Database needs rebuilding',
-            'Completely lost: No backups and original destroyed'
-          ],
+          examples: [],
           scores: {
             recoverable: 0,
             temporal: 0.25,
@@ -607,7 +527,7 @@ const DataBreachCalculator = () => {
     },
     {
       id: 'cb_malicious',
-      category: 'Intentional Harm',
+      category: 'A4 Malicious intent',
       questions: [
         {
           id: 'cb_malicious_intent',
@@ -624,19 +544,19 @@ const DataBreachCalculator = () => {
     }
   ];
 
-  // Business sectors (for NIS2 and sector-specific guidance)
+  // Business sectors for GDPR guidance
   const businessSectors = [
-    { id: 'healthcare', name: 'Healthcare', nis2: true, critical: true },
-    { id: 'finance', name: 'Banking & Finance', nis2: true, critical: true },
-    { id: 'energy', name: 'Energy', nis2: true, critical: true },
-    { id: 'transport', name: 'Transport', nis2: true, critical: true },
-    { id: 'digital_infra', name: 'Digital Infrastructure', nis2: true, critical: true },
-    { id: 'water', name: 'Water Supply', nis2: true, critical: true },
-    { id: 'manufacturing', name: 'Manufacturing', nis2: true, critical: false },
-    { id: 'retail', name: 'Retail & E-commerce', nis2: false, critical: false },
-    { id: 'education', name: 'Education', nis2: false, critical: false },
-    { id: 'public_admin', name: 'Public Administration', nis2: true, critical: true },
-    { id: 'other', name: 'Other', nis2: false, critical: false }
+    { id: 'healthcare', name: 'Healthcare' },
+    { id: 'finance', name: 'Banking & Finance' },
+    { id: 'energy', name: 'Energy' },
+    { id: 'transport', name: 'Transport' },
+    { id: 'digital_infra', name: 'Digital Infrastructure' },
+    { id: 'water', name: 'Water Supply' },
+    { id: 'manufacturing', name: 'Manufacturing' },
+    { id: 'retail', name: 'Retail & E-commerce' },
+    { id: 'education', name: 'Education' },
+    { id: 'public_admin', name: 'Public Administration' },
+    { id: 'other', name: 'Other' }
   ];
 
   const steps = [
@@ -689,13 +609,23 @@ const DataBreachCalculator = () => {
           dpc += 1; // Financial sector breaches with financial data are critical
         }
 
-        // Add modifiers from data type specific questions
+        // Calculate score from data type specific questions
         const questions = dataTypeQuestions[typeId] || [];
+        let maxQuestionScore = dataType.baseScore;
+        
         questions.forEach(q => {
-          if (responses[q.id] === 'yes' && q.modifier) {
+          if ('scores' in q && q.scores && responses[q.id]) {
+            const selectedScore = q.scores[responses[q.id] as keyof typeof q.scores];
+            if (selectedScore) {
+              maxQuestionScore = Math.max(maxQuestionScore, selectedScore);
+            }
+          } else if (responses[q.id] === 'yes' && q.modifier) {
             dpc += q.modifier;
           }
         });
+        
+        // Replace the base score with the question score (or keep base if no question answered)
+        dpc = dpc - dataType.baseScore + maxQuestionScore;
       }
     });
 
@@ -776,7 +706,6 @@ const DataBreachCalculator = () => {
     // Determine risk level and notifications based on ENISA methodology
     let risk, actions = [];
     const hasSpecialCategories = selectedDataTypes.includes('sensitive');
-    const isNIS2Sector = businessSectors.find(s => s.id === businessSector)?.nis2 || false;
     
     // Enhanced risk assessment considering multiple factors
     if (final <= 1 && !hasSpecialCategories) {
@@ -800,10 +729,6 @@ const DataBreachCalculator = () => {
       ];
     }
 
-    // Add NIS2 requirements if applicable
-    if (isNIS2Sector && (risk === 'High' || risk === 'Very High')) {
-      actions.push('Report to national CSIRT/competent authority (NIS2 Directive)');
-    }
 
     // Set compliance requirements
     setComplianceReqs({
@@ -957,18 +882,9 @@ const DataBreachCalculator = () => {
 
   const MultiChoiceCard = ({ question }: { question: Question }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-      <div className="mb-3">
+      <div className="mb-4">
         <h4 className="font-medium text-gray-900 mb-2">{question.question}</h4>
-        <p className="text-sm text-gray-600 mb-3">{question.explanation}</p>
-        
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <h5 className="font-medium text-gray-700 mb-2 text-sm">Options:</h5>
-          <ul className="text-sm space-y-1">
-            {question.examples.map((example: string, index: number) => (
-              <li key={index} className="text-gray-700">• {example}</li>
-            ))}
-          </ul>
-        </div>
+        <p className="text-sm text-gray-600">{question.explanation}</p>
       </div>
 
       <div className="space-y-3">
@@ -976,44 +892,72 @@ const DataBreachCalculator = () => {
           const getOptionLabel = (questionId: string, optionKey: string) => {
             if (questionId === 'cb_availability') {
               return {
-                recoverable: 'Easily recoverable (no impact)',
-                temporal: 'Recoverable with work (low impact)', 
-                permanent: 'Completely lost forever (high impact)'
+                recoverable: 'Easily recoverable — One copy lost but others available, temporary system downtime with quick restoration, or backup systems immediately took over with no lasting impact.',
+                temporal: 'Recoverable with work — Database needs rebuilding, systems require restoration from backups, or significant effort needed to restore access but data can ultimately be recovered.',
+                permanent: 'Completely lost forever — No backups available, original data destroyed, or systems permanently damaged with no possibility of recovering the lost information.'
               }[optionKey] || optionKey;
             } else if (questionId === 'cb_confidentiality') {
               return {
-                lost: 'Lost or discarded (no confirmed access)',
-                known: 'Shared with known parties (limited exposure)',
-                public: 'Public or unknown exposure (wide access)'
+                lost: 'Lost or discarded — Laptop lost during shipping, papers thrown in trash, device stolen but no evidence of data access, or physical loss without confirmed unauthorized viewing.',
+                known: 'Shared with known parties — Email sent to wrong internal group, data shared with trusted but unauthorized colleagues, or exposure to identifiable parties with limited reach.',
+                public: 'Public or unknown exposure — Data posted online, published by hackers, shared on social media, or exposed to unknown parties with potentially wide access and distribution.'
               }[optionKey] || optionKey;
             } else if (questionId === 'cb_integrity') {
               return {
-                fixed: 'Fixed before use (no impact)',
-                fixable: 'Used but can be corrected (temporary impact)',
-                permanent: 'Permanently altered (irreversible)'
+                fixed: 'Fixed before use — Database changed but restored before anyone used the incorrect data, errors caught and corrected immediately, or modifications reversed with no impact on operations.',
+                fixable: 'Used but can be corrected — Medical records changed requiring patient rescheduling, financial data altered but transactions can be reversed, or incorrect information acted upon but consequences can be remedied.',
+                permanent: 'Permanently altered — Database corrupted with no backup, critical records irreversibly changed, or modifications that cannot be undone and have lasting consequences.'
               }[optionKey] || optionKey;
             } else if (questionId === 'ease_of_identification') {
               return {
-                very_difficult: 'Very difficult to identify (0.25)',
-                moderately_difficult: 'Moderately difficult to identify (0.5)',
-                somewhat_easy: 'Somewhat easy to identify (0.75)',
-                very_easy: 'Very easy to identify (1.0)'
+                very_difficult: 'Very difficult to identify — Random IDs, coded emails (user12345@company.com), encrypted usernames, or anonymized data that would require significant effort and additional information to link back to real individuals.',
+                moderately_difficult: 'Moderately difficult to identify — Anonymous usernames or handles that might be searchable online, partial names, or indirect identifiers that could potentially be cross-referenced with other sources to identify individuals.',
+                somewhat_easy: 'Somewhat easy to identify — Full names in small communities, unique names, professional email addresses, or identifiers commonly used across multiple platforms that make individuals relatively easy to find.',
+                very_easy: 'Very easy to identify — Real names in standard email addresses, primary identifiers used everywhere, or direct personal identifiers that immediately reveal who the individuals are without any additional research required.'
+              }[optionKey] || optionKey;
+            } else if (questionId === 'personal_data_level') {
+              return {
+                level1: 'Level 1: Basic contact information only — Names, email addresses, phone numbers, basic work details. Information people commonly share publicly or professionally.',
+                level2: 'Level 2: Enough information to create personal profiles — Detailed addresses, employment history, education background, family details, income levels, or information that reveals social status, lifestyle, or personal circumstances.',
+                level3: 'Level 3: Information revealing private beliefs or conditions — Health conditions, sexual orientation, political views, religious beliefs, trade union membership, or other deeply personal information that could lead to discrimination.',
+                level4: 'Level 4: Information about vulnerable groups requiring special protection — Data about children, elderly in care, domestic violence victims, witnesses, or others where exposure could be critical for their personal safety or psychological well-being.'
+              }[optionKey] || optionKey;
+            } else if (questionId === 'behavioral_data_level') {
+              return {
+                level1: 'Level 1: Limited behavioral data with minimal insights — Individual data points that don\'t reveal patterns, or information easily available from public sources (single location check-in, one-time website visit, publicly posted preferences).',
+                level2: 'Level 2: Standard behavioral data — Basic patterns of activity like general shopping preferences, some location history, or browsing habits that provide limited insight into daily life but don\'t create detailed profiles.',
+                level3: 'Level 3: Detailed behavioral profiles — Comprehensive data that reveals detailed daily life patterns, complete location tracking, extensive purchase history, or communication patterns that expose personal habits and lifestyle choices.',
+                level4: 'Level 4: Behavioral data revealing sensitive personal information — Patterns that expose health conditions (frequent hospital visits), personal relationships (dating patterns), political views (rally attendance), or other deeply private aspects of life.'
+              }[optionKey] || optionKey;
+            } else if (questionId === 'financial_data_level') {
+              return {
+                level1: 'Level 1: Minimal financial data with no substantial insights — Just knowing someone is a customer of a certain bank, has a credit card, or uses a financial service, without any specific details about accounts or transactions.',
+                level2: 'Level 2: Some financial information but limited insights — Partial account numbers (last 4 digits), expired card details, or basic transaction information that doesn\'t reveal significant financial status or enable fraud.',
+                level3: 'Level 3: Standard financial data — Complete account numbers, salary information, transaction history, or investment details that provide insights into financial status but may not immediately enable fraud.',
+                level4: 'Level 4: Complete financial information enabling fraud or detailed profiling — Full credit card details with CVV, online banking credentials, complete financial statements, or comprehensive data that could enable fraud or create detailed financial profiles.'
+              }[optionKey] || optionKey;
+            } else if (questionId === 'sensitive_data_level') {
+              return {
+                level1: 'Level 1: General information with minimal behavioral insights — Data that can be easily found through public sources or web searches, or only provides general hints about sensitive topics (knowing someone visited a hospital, attended a religious service).',
+                level2: 'Level 2: Information that can lead to general assumptions — Data that suggests sensitive characteristics but isn\'t specific (membership in health-related groups, attendance at political events, general lifestyle indicators).',
+                level3: 'Level 3: Information that can lead to assumptions about sensitive details — More specific data that reveals sensitive characteristics like health conditions, political views, religious beliefs, or sexual orientation, but not the most detailed information.',
+                level4: 'Level 4: Highly specific sensitive information — Detailed medical diagnoses, specific therapy records, intimate personal details, or comprehensive sensitive data that could cause significant harm if disclosed.'
               }[optionKey] || optionKey;
             }
             return optionKey;
           };
 
           return (
-            <label key={key} className="flex items-center gap-2 cursor-pointer">
+            <label key={key} className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50">
               <input
                 type="radio"
                 name={question.id}
                 value={key}
                 checked={responses[question.id] === key}
                 onChange={() => handleResponse(question.id, key)}
-                className="text-blue-600"
+                className="text-blue-600 mt-1 flex-shrink-0"
               />
-              <span className="text-gray-700">
+              <span className="text-gray-700 leading-relaxed">
                 {getOptionLabel(question.id, key)}
               </span>
             </label>
@@ -1077,7 +1021,7 @@ const DataBreachCalculator = () => {
             <h2 className="text-2xl font-semibold mb-6">Tell us about your organization and the breach</h2>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <p className="text-blue-800">
-                <strong>Why this matters:</strong> Different sectors have specific regulatory requirements under GDPR and NIS2 Directive. The scale of the breach also affects notification requirements.
+                <strong>Why this matters:</strong> Different sectors have specific regulatory requirements under GDPR. The scale of the breach also affects notification requirements.
               </p>
             </div>
             
@@ -1094,7 +1038,7 @@ const DataBreachCalculator = () => {
                   <option value="">Select your sector...</option>
                   {businessSectors.map(sector => (
                     <option key={sector.id} value={sector.id}>
-                      {sector.name} {sector.nis2 && '(NIS2 Regulated)'}
+                      {sector.name}
                     </option>
                   ))}
                 </select>
@@ -1119,14 +1063,6 @@ const DataBreachCalculator = () => {
                 </select>
               </div>
 
-              {businessSector && businessSectors.find(s => s.id === businessSector)?.nis2 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-amber-900 mb-2">NIS2 Directive Applies</h3>
-                  <p className="text-amber-800 text-sm">
-                    Your sector is covered by the NIS2 Directive (effective January 2023). This means you have additional cybersecurity obligations and may need to report significant incidents to both data protection and cybersecurity authorities.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         );
@@ -1135,9 +1071,9 @@ const DataBreachCalculator = () => {
         return (
           <div>
             <h2 className="text-2xl font-semibold mb-6">What types of information were involved in the breach?</h2>
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-              <p className="text-amber-800">
-                <strong>Important:</strong> Select ALL types of data that were part of the breach. Most breaches involve multiple types of information. You'll answer detailed questions about each type next.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-blue-800">
+                <strong>Select all that apply:</strong> Most data breaches involve multiple types of information. Choose every category that was exposed, even if only some records contained that data type. This helps us calculate the most accurate risk level.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -1187,10 +1123,10 @@ const DataBreachCalculator = () => {
               </div>
               
               {selectedDataTypes.includes('sensitive') && (
-                <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-red-900 mb-2">Special Category Data Detected</h4>
-                  <p className="text-red-800 text-sm">
-                    You've selected sensitive personal data (GDPR Article 9). This includes health data, biometric data, political opinions, religious beliefs, etc. Breaches involving special categories require enhanced protection measures and may have stricter notification requirements.
+                <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-orange-900 mb-2">⚠️ Highly Sensitive Data Selected</h4>
+                  <p className="text-orange-800 text-sm">
+                    You've indicated that highly sensitive information was involved (medical records, political views, biometric data, etc.). This typically requires stricter protection measures and may mean you need to notify both authorities and affected individuals more quickly.
                   </p>
                 </div>
               )}
@@ -1247,10 +1183,12 @@ const DataBreachCalculator = () => {
             {questions.length > 0 ? (
               <div>
                 <p className="text-gray-600 mb-6">
-                  Answer these questions to help us better assess the risk for this type of data.
+                  These questions help us understand exactly what was exposed and calculate a more accurate risk level. Choose the option that best matches your situation.
                 </p>
                 {questions.map((q: Question) => (
-                  <QuestionCard key={q.id} question={q} />
+                  'scores' in q && q.scores && typeof q.scores === 'object' ? 
+                    <MultiChoiceCard key={q.id} question={q} /> :
+                    <QuestionCard key={q.id} question={q} />
                 ))}
               </div>
             ) : (
@@ -1269,25 +1207,133 @@ const DataBreachCalculator = () => {
             <p className="text-gray-600 mb-8">These factors can make the breach more or less serious.</p>
             
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <AlertTriangle size={20} className="text-orange-600" />
-                Factors that INCREASE risk
-              </h3>
               <div className="bg-orange-50 rounded-lg p-4">
                 {modifyingFactors.increasing.map(factor => (
-                  <QuestionCard key={factor.id} question={factor} />
+                  <div key={factor.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                    <div className="mb-4">
+                      <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                        <AlertTriangle size={20} className="text-orange-600" />
+                        {factor.question}
+                      </h4>
+                      <p className="text-sm text-gray-600">{factor.explanation}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={factor.id}
+                            value="yes"
+                            checked={responses[factor.id] === 'yes'}
+                            onChange={() => handleResponse(factor.id, 'yes')}
+                            className="text-green-600"
+                          />
+                          <span className="text-green-700 font-medium">Yes</span>
+                        </div>
+                        <div className="ml-6">
+                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                          <ul className="text-sm space-y-1">
+                            {factor.examples.filter((example: string) => example.startsWith('✓')).map((example: string, index: number) => (
+                              <li key={index} className="text-green-700">
+                                {example.substring(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </label>
+
+                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={factor.id}
+                            value="no"
+                            checked={responses[factor.id] === 'no'}
+                            onChange={() => handleResponse(factor.id, 'no')}
+                            className="text-red-600"
+                          />
+                          <span className="text-red-700 font-medium">No</span>
+                        </div>
+                        <div className="ml-6">
+                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                          <ul className="text-sm space-y-1">
+                            {factor.examples.filter((example: string) => example.startsWith('✗')).map((example: string, index: number) => (
+                              <li key={index} className="text-red-700">
+                                {example.substring(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Shield size={20} className="text-green-600" />
-                Factors that DECREASE risk
-              </h3>
               <div className="bg-green-50 rounded-lg p-4">
                 {modifyingFactors.decreasing.map(factor => (
-                  <QuestionCard key={factor.id} question={factor} />
+                  <div key={factor.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                    <div className="mb-4">
+                      <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                        <Shield size={20} className="text-green-600" />
+                        {factor.question}
+                      </h4>
+                      <p className="text-sm text-gray-600">{factor.explanation}</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={factor.id}
+                            value="yes"
+                            checked={responses[factor.id] === 'yes'}
+                            onChange={() => handleResponse(factor.id, 'yes')}
+                            className="text-green-600"
+                          />
+                          <span className="text-green-700 font-medium">Yes</span>
+                        </div>
+                        <div className="ml-6">
+                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                          <ul className="text-sm space-y-1">
+                            {factor.examples.filter((example: string) => example.startsWith('✓')).map((example: string, index: number) => (
+                              <li key={index} className="text-green-700">
+                                {example.substring(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </label>
+
+                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={factor.id}
+                            value="no"
+                            checked={responses[factor.id] === 'no'}
+                            onChange={() => handleResponse(factor.id, 'no')}
+                            className="text-red-600"
+                          />
+                          <span className="text-red-700 font-medium">No</span>
+                        </div>
+                        <div className="ml-6">
+                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                          <ul className="text-sm space-y-1">
+                            {factor.examples.filter((example: string) => example.startsWith('✗')).map((example: string, index: number) => (
+                              <li key={index} className="text-red-700">
+                                {example.substring(2)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -1321,7 +1367,62 @@ const DataBreachCalculator = () => {
                   {category.questions.map(q => (
                     'scores' in q && q.scores && typeof q.scores === 'object' ? 
                       <MultiChoiceCard key={q.id} question={q} /> :
-                      <QuestionCard key={q.id} question={q} />
+                      <div key={q.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                        <div className="mb-4">
+                          <h4 className="font-medium text-gray-900 mb-2">{q.question}</h4>
+                          <p className="text-sm text-gray-600">{q.explanation}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={q.id}
+                                value="yes"
+                                checked={responses[q.id] === 'yes'}
+                                onChange={() => handleResponse(q.id, 'yes')}
+                                className="text-green-600"
+                              />
+                              <span className="text-green-700 font-medium">Yes</span>
+                            </div>
+                            <div className="ml-6">
+                              <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                              <ul className="text-sm space-y-1">
+                                {q.examples.filter((example: string) => example.startsWith('✓')).map((example: string, index: number) => (
+                                  <li key={index} className="text-green-700">
+                                    {example.substring(2)}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </label>
+
+                          <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={q.id}
+                                value="no"
+                                checked={responses[q.id] === 'no'}
+                                onChange={() => handleResponse(q.id, 'no')}
+                                className="text-red-600"
+                              />
+                              <span className="text-red-700 font-medium">No</span>
+                            </div>
+                            <div className="ml-6">
+                              <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
+                              <ul className="text-sm space-y-1">
+                                {q.examples.filter((example: string) => example.startsWith('✗')).map((example: string, index: number) => (
+                                  <li key={index} className="text-red-700">
+                                    {example.substring(2)}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
                   ))}
                 </div>
               </div>
@@ -1330,6 +1431,119 @@ const DataBreachCalculator = () => {
         );
 
       case 6: // Results
+        // Calculate detailed factor scores for summary
+        const calculateFactorDetails = () => {
+          const details = {
+            dataTypes: [] as any[],
+            increasingFactors: [] as any[],
+            decreasingFactors: [] as any[],
+            easeOfIdentification: 0.25,
+            breachCircumstances: [] as any[],
+            dpcScore: 0,
+            cbScore: 0
+          };
+
+          // Data type contributions
+          selectedDataTypes.forEach(typeId => {
+            const dataType = dataTypes.find(dt => dt.id === typeId);
+            if (dataType) {
+              let typeScore = dataType.baseScore;
+              const typeQuestions = dataTypeQuestions[typeId] || [];
+              const answeredQuestions = [] as any[];
+              
+              typeQuestions.forEach(q => {
+                if (responses[q.id] === 'yes' && q.modifier) {
+                  typeScore += q.modifier;
+                  answeredQuestions.push({
+                    question: q.question,
+                    modifier: q.modifier
+                  });
+                }
+              });
+
+              details.dataTypes.push({
+                name: dataType.name,
+                baseScore: dataType.baseScore,
+                questions: answeredQuestions,
+                totalScore: typeScore
+              });
+              details.dpcScore += typeScore;
+            }
+          });
+
+          // Scale modifier
+          const count = parseInt(affectedCount) || 0;
+          let scaleModifier = 0;
+          if (count > 100000) scaleModifier = 2;
+          else if (count > 10000) scaleModifier = 1;
+          else if (count > 1000) scaleModifier = 0.5;
+          
+          if (scaleModifier > 0) {
+            details.dpcScore += scaleModifier;
+            details.increasingFactors.push({
+              name: `Large scale breach (${affectedCount} people)`,
+              score: scaleModifier
+            });
+          }
+
+          // Increasing factors
+          modifyingFactors.increasing.forEach(factor => {
+            if (responses[factor.id] === 'yes') {
+              details.increasingFactors.push({
+                name: factor.question,
+                score: factor.score
+              });
+              details.dpcScore += factor.score;
+            }
+          });
+
+          // Decreasing factors
+          modifyingFactors.decreasing.forEach(factor => {
+            if (responses[factor.id] === 'yes') {
+              details.decreasingFactors.push({
+                name: factor.question,
+                score: factor.score
+              });
+              details.dpcScore += factor.score; // Note: score is negative
+            }
+          });
+
+          // Ease of identification
+          eiQuestions.forEach(q => {
+            if ('scores' in q && q.scores && responses[q.id]) {
+              details.easeOfIdentification = q.scores[responses[q.id] as keyof typeof q.scores];
+            }
+          });
+
+          // Breach circumstances
+          cbQuestions.forEach(category => {
+            category.questions.forEach(q => {
+              if ('scores' in q && q.scores && responses[q.id]) {
+                const score = q.scores[responses[q.id] as keyof typeof q.scores];
+                if (score > 0) {
+                  details.breachCircumstances.push({
+                    name: category.category,
+                    question: q.question,
+                    score: score
+                  });
+                  details.cbScore += score;
+                }
+              } else if ('score' in q && responses[q.id] === 'yes') {
+                details.breachCircumstances.push({
+                  name: category.category,
+                  question: q.question,
+                  score: q.score
+                });
+                details.cbScore += q.score || 0;
+              }
+            });
+          });
+
+          return details;
+        };
+
+        const factorDetails = calculateFactorDetails();
+
         return (
           <div>
             <div className="bg-white rounded-lg shadow-lg border-2 border-gray-200 p-6 mb-8">
@@ -1364,6 +1578,375 @@ const DataBreachCalculator = () => {
                     </li>
                   ))}
                 </ul>
+              </div>
+            </div>
+
+            {/* User Choices Summary */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Your Assessment Summary</h3>
+              
+              <div className="space-y-6">
+                {/* Organization & Scale */}
+                <div className="border-b border-gray-200 pb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Organization & Scale</h4>
+                    <button 
+                      onClick={() => setEditModalOpen('organization')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-700 space-y-1">
+                    <p><strong>Sector:</strong> {businessSectors.find(s => s.id === businessSector)?.name || 'Not selected'}</p>
+                    <p><strong>People affected:</strong> {affectedCount ? 
+                      affectedCount === '1' ? '1-10 individuals' :
+                      affectedCount === '50' ? '11-100 individuals' :
+                      affectedCount === '500' ? '101-1,000 individuals' :
+                      affectedCount === '5000' ? '1,001-10,000 individuals' :
+                      affectedCount === '50000' ? '10,001-100,000 individuals' :
+                      affectedCount === '500000' ? 'More than 100,000 individuals' : 'Unknown'
+                      : 'Not selected'}</p>
+                  </div>
+                </div>
+
+                {/* Data Types */}
+                <div className="border-b border-gray-200 pb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Data Types Involved</h4>
+                    <button 
+                      onClick={() => setEditModalOpen('dataTypes')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {selectedDataTypes.length > 0 ? (
+                      <ul className="space-y-1">
+                        {selectedDataTypes.map(typeId => {
+                          const dataType = dataTypes.find(dt => dt.id === typeId);
+                          return dataType ? (
+                            <li key={typeId}>• {dataType.name}</li>
+                          ) : null;
+                        })}
+                      </ul>
+                    ) : (
+                      <p>No data types selected</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Data Type Details */}
+                {selectedDataTypes.length > 0 && (
+                  <div className="border-b border-gray-200 pb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">Data Type Details</h4>
+                      <button 
+                        onClick={() => setEditModalOpen('dataDetails')}
+                        className="text-blue-600 hover:text-blue-800 text-sm underline"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-700 space-y-2">
+                      {selectedDataTypes.map(typeId => {
+                        const dataType = dataTypes.find(dt => dt.id === typeId);
+                        const questions = dataTypeQuestions[typeId] || [];
+                        if (!dataType || questions.length === 0) return null;
+                        
+                        return (
+                          <div key={typeId}>
+                            <p className="font-medium">{dataType.name}:</p>
+                            {questions.map(q => {
+                              const response = responses[q.id];
+                              if (!response) return null;
+                              
+                              let responseLabel = response;
+                              if ('scores' in q && q.scores) {
+                                const getOptionLabel = (questionId: string, optionKey: string) => {
+                                  if (questionId === 'personal_data_level') {
+                                    return {
+                                      level1: 'Level 1: Basic contact information only',
+                                      level2: 'Level 2: Enough information to create personal profiles',
+                                      level3: 'Level 3: Information revealing private beliefs or conditions',
+                                      level4: 'Level 4: Information about vulnerable groups requiring special protection'
+                                    }[optionKey] || optionKey;
+                                  } else if (questionId === 'behavioral_data_level') {
+                                    return {
+                                      level1: 'Level 1: Limited behavioral data with minimal insights',
+                                      level2: 'Level 2: Standard behavioral data',
+                                      level3: 'Level 3: Detailed behavioral profiles',
+                                      level4: 'Level 4: Behavioral data revealing sensitive personal information'
+                                    }[optionKey] || optionKey;
+                                  } else if (questionId === 'financial_data_level') {
+                                    return {
+                                      level1: 'Level 1: Minimal financial data with no substantial insights',
+                                      level2: 'Level 2: Some financial information but limited insights',
+                                      level3: 'Level 3: Standard financial data',
+                                      level4: 'Level 4: Complete financial information enabling fraud or detailed profiling'
+                                    }[optionKey] || optionKey;
+                                  } else if (questionId === 'sensitive_data_level') {
+                                    return {
+                                      level1: 'Level 1: General information with minimal behavioral insights',
+                                      level2: 'Level 2: Information that can lead to general assumptions',
+                                      level3: 'Level 3: Information that can lead to assumptions about sensitive details',
+                                      level4: 'Level 4: Highly specific sensitive information'
+                                    }[optionKey] || optionKey;
+                                  }
+                                  return optionKey;
+                                };
+                                responseLabel = getOptionLabel(q.id, response);
+                              }
+                              
+                              return (
+                                <p key={q.id} className="ml-4 text-xs">
+                                  {q.question}: <span className="text-gray-600">{responseLabel}</span>
+                                </p>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Risk Factors */}
+                <div className="border-b border-gray-200 pb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Risk Factors</h4>
+                    <button 
+                      onClick={() => setEditModalOpen('riskFactors')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-700 space-y-1">
+                    {[...modifyingFactors.increasing, ...modifyingFactors.decreasing].map(factor => {
+                      const response = responses[factor.id];
+                      if (!response) return null;
+                      return (
+                        <p key={factor.id}>
+                          {factor.question}: <span className="font-medium">{response === 'yes' ? 'Yes' : 'No'}</span>
+                        </p>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Ease of Identification */}
+                <div className="border-b border-gray-200 pb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Ease of Identification</h4>
+                    <button 
+                      onClick={() => setEditModalOpen('identification')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    {eiQuestions.map(q => {
+                      const response = responses[q.id];
+                      if (!response) return <p key={q.id}>Not answered</p>;
+                      
+                      const responseLabel = {
+                        very_difficult: 'Very difficult to identify',
+                        moderately_difficult: 'Moderately difficult to identify',
+                        somewhat_easy: 'Somewhat easy to identify',
+                        very_easy: 'Very easy to identify'
+                      }[response] || response;
+                      
+                      return (
+                        <p key={q.id}>{responseLabel}</p>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Breach Circumstances */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Breach Circumstances</h4>
+                    <button 
+                      onClick={() => setEditModalOpen('circumstances')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="text-sm text-gray-700 space-y-1">
+                    {cbQuestions.map(category => (
+                      <div key={category.id}>
+                        {category.questions.map(q => {
+                          const response = responses[q.id];
+                          if (!response) return null;
+                          
+                          let responseLabel = response;
+                          if ('scores' in q && q.scores) {
+                            responseLabel = {
+                              lost: 'Lost or discarded',
+                              known: 'Shared with known parties',
+                              public: 'Public or unknown exposure',
+                              fixed: 'Fixed before use',
+                              fixable: 'Used but can be corrected',
+                              permanent: 'Permanently altered',
+                              recoverable: 'Easily recoverable',
+                              temporal: 'Recoverable with work',
+                            }[response] || response;
+                          } else if (response === 'yes' || response === 'no') {
+                            responseLabel = response === 'yes' ? 'Yes' : 'No';
+                          }
+                          
+                          return (
+                            <p key={q.id}>
+                              {category.category}: <span className="font-medium">{responseLabel}</span>
+                            </p>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Factor Scoring Summary */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Factor Scoring Breakdown</h3>
+              
+              {/* Formula Breakdown */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Data & Context (DPC)</p>
+                    <p className="text-2xl font-bold text-gray-900">{factorDetails.dpcScore.toFixed(1)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Ease of ID (EI)</p>
+                    <p className="text-2xl font-bold text-gray-900">× {factorDetails.easeOfIdentification}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Circumstances (CB)</p>
+                    <p className="text-2xl font-bold text-gray-900">+ {factorDetails.cbScore.toFixed(1)}</p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-300 text-center">
+                  <p className="text-sm text-gray-600">Final Score = ({factorDetails.dpcScore.toFixed(1)} × {factorDetails.easeOfIdentification}) + {factorDetails.cbScore.toFixed(1)} = {finalScore.toFixed(2)}</p>
+                </div>
+              </div>
+
+              {/* Detailed Breakdown */}
+              <div className="space-y-6">
+                {/* Data Types */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <User size={20} className="text-blue-600" />
+                    Data Types Involved
+                  </h4>
+                  <div className="space-y-2">
+                    {factorDetails.dataTypes.map((dt, idx) => (
+                      <div key={idx} className="bg-blue-50 rounded-lg p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium text-blue-900">{dt.name}</span>
+                          <span className="text-blue-700 font-bold">+{dt.totalScore}</span>
+                        </div>
+                        <div className="text-sm text-blue-700">
+                          <span>Base score: {dt.baseScore}</span>
+                          {dt.questions.length > 0 && (
+                            <div className="mt-1">
+                              {dt.questions.map((q: any, qIdx: number) => (
+                                <div key={qIdx} className="ml-4">
+                                  • {q.question} (+{q.modifier})
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Increasing Factors */}
+                {factorDetails.increasingFactors.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle size={20} className="text-orange-600" />
+                      Risk Increasing Factors
+                    </h4>
+                    <div className="space-y-2">
+                      {factorDetails.increasingFactors.map((factor, idx) => (
+                        <div key={idx} className="bg-orange-50 rounded-lg p-3 flex justify-between">
+                          <span className="text-orange-900">{factor.name}</span>
+                          <span className="text-orange-700 font-bold">+{factor.score}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Decreasing Factors */}
+                {factorDetails.decreasingFactors.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Shield size={20} className="text-green-600" />
+                      Risk Decreasing Factors
+                    </h4>
+                    <div className="space-y-2">
+                      {factorDetails.decreasingFactors.map((factor, idx) => (
+                        <div key={idx} className="bg-green-50 rounded-lg p-3 flex justify-between">
+                          <span className="text-green-900">{factor.name}</span>
+                          <span className="text-green-700 font-bold">{factor.score}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ease of Identification */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <User size={20} className="text-purple-600" />
+                    Ease of Identification
+                  </h4>
+                  <div className="bg-purple-50 rounded-lg p-3">
+                    <div className="flex justify-between">
+                      <span className="text-purple-900">
+                        {factorDetails.easeOfIdentification === 0.25 && 'Very difficult to identify individuals'}
+                        {factorDetails.easeOfIdentification === 0.5 && 'Moderately difficult to identify individuals'}
+                        {factorDetails.easeOfIdentification === 0.75 && 'Somewhat easy to identify individuals'}
+                        {factorDetails.easeOfIdentification === 1.0 && 'Very easy to identify individuals'}
+                      </span>
+                      <span className="text-purple-700 font-bold">×{factorDetails.easeOfIdentification}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Breach Circumstances */}
+                {factorDetails.breachCircumstances.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <AlertTriangle size={20} className="text-red-600" />
+                      Breach Circumstances
+                    </h4>
+                    <div className="space-y-2">
+                      {factorDetails.breachCircumstances.map((circ, idx) => (
+                        <div key={idx} className="bg-red-50 rounded-lg p-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-red-900 font-medium">{circ.name}</span>
+                              <p className="text-red-700 text-sm mt-1">{circ.question}</p>
+                            </div>
+                            <span className="text-red-700 font-bold ml-4">+{circ.score}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1456,15 +2039,12 @@ const DataBreachCalculator = () => {
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3">
           <Shield className="text-blue-600" />
-          <span className="hidden sm:inline">ENISA Data Breach Risk Calculator</span>
-          <span className="sm:hidden">ENISA Breach Calculator</span>
+          <span className="hidden sm:inline">Data Breach Risk Calculator</span>
+          <span className="sm:hidden">Breach Calculator</span>
         </h1>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-blue-800 leading-relaxed">
-            <strong>What this tool does:</strong> Based on ENISA's official methodology, this calculator helps you assess the severity of personal data breaches and determine your obligations under GDPR and NIS2 Directive.
-          </p>
-          <p className="text-blue-700 text-sm mt-2">
-            Compliant with: GDPR Articles 33-34, NIS2 Directive, ENISA Recommendations (December 2013)
+            <strong>What this tool does:</strong> This calculator helps you assess the severity of personal data breaches and determine your obligations under GDPR.
           </p>
         </div>
       </div>
