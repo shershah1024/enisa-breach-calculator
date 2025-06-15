@@ -1,11 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import UserTypeModal from "./components/UserTypeModal"
 
 export default function Home() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isUserTypeModalOpen, setIsUserTypeModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -28,8 +30,25 @@ export default function Home() {
     })
   }
 
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('userTypeSelected')
+    if (!hasVisited) {
+      setIsUserTypeModalOpen(true)
+    }
+  }, [])
+
+  const handleUserTypeSelection = (userType: 'client' | 'compliance') => {
+    localStorage.setItem('userTypeSelected', 'true')
+    setIsUserTypeModalOpen(false)
+    
+    if (userType === 'compliance') {
+      window.location.href = 'https://intgen.ai'
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-white">
+    <div className="relative">
+      <main className={`min-h-screen bg-white ${isUserTypeModalOpen ? 'blur-sm' : ''}`}>
       {/* Navigation */}
       <nav className="relative">
         <div className="flex justify-between items-center px-4 md:px-12 py-6 md:py-8 border-b-4 border-black">
@@ -531,6 +550,113 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </main>
+      </main>
+
+      <UserTypeModal 
+        isOpen={isUserTypeModalOpen} 
+        onUserTypeSelect={handleUserTypeSelection} 
+      />
+
+      {/* Consultation Form Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+          <div className="bg-white border-4 border-black p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl md:text-2xl font-black uppercase tracking-[0.1em]">Schedule Consultation</h3>
+              <button 
+                onClick={() => setIsFormOpen(false)}
+                className="text-gray-500 hover:text-black transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
+                  placeholder="Enter your full name"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="company" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
+                  Company *
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  required
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
+                  placeholder="Enter your company name"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
+                  placeholder="Enter your email address"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="phone" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="flex-1 border-2 border-black text-black px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-black text-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-800 transition-colors"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
