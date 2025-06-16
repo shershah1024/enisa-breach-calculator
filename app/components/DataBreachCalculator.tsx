@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, Calculator, Check, ChevronRight, ChevronLeft, CreditCard, User, Activity, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
 import Link from 'next/link';
+import ConsultationButton from './ConsultationButton';
 
 interface Responses {
   [key: string]: string;
@@ -2127,19 +2128,23 @@ const DataBreachCalculator = () => {
 
           {/* Navigation */}
           <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className={`flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors ${
-                currentStep === 0 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200' 
-                  : 'bg-white text-black border-2 border-black hover:bg-gray-100'
-              }`}
-            >
-              <ChevronLeft size={20} />
-              <span className="hidden sm:inline">Previous</span>
-              <span className="sm:hidden">Back</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className={`flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors ${
+                  currentStep === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200' 
+                    : 'bg-white text-black border-2 border-black hover:bg-gray-100'
+                }`}
+              >
+                <ChevronLeft size={20} />
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Back</span>
+              </button>
+              
+              <ConsultationButton compact className="border-2 border-black" />
+            </div>
             
             {(currentStep < steps.length - 1 || (currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1)) && (
               <button

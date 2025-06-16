@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import UserTypeModal from "./components/UserTypeModal"
 
 export default function Home() {
-  const [isFormOpen, setIsFormOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserTypeModalOpen, setIsUserTypeModalOpen] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,7 +18,7 @@ export default function Home() {
     e.preventDefault()
     console.log('Form submitted:', formData)
     // Handle form submission here
-    setIsFormOpen(false)
+    alert('Thank you for your submission! We will contact you shortly.')
     setFormData({ name: '', company: '', phone: '', email: '' })
   }
 
@@ -71,7 +70,7 @@ export default function Home() {
               Compliance Tools
             </Link>
             <button 
-              onClick={() => setIsFormOpen(true)}
+              onClick={() => document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })}
               className="bg-black text-white px-8 py-3 text-sm uppercase tracking-[0.2em] font-medium hover:bg-gray-800 transition-colors"
             >
               Schedule Consultation
@@ -108,7 +107,7 @@ export default function Home() {
               </Link>
               <button 
                 onClick={() => {
-                  setIsFormOpen(true)
+                  document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })
                   setIsMobileMenuOpen(false)
                 }}
                 className="w-full bg-black text-white px-6 py-3 text-sm uppercase tracking-[0.2em] font-medium hover:bg-gray-800 transition-colors text-center"
@@ -174,7 +173,7 @@ export default function Home() {
                       </svg>
                     </Link>
                     <button 
-                      onClick={() => setIsFormOpen(true)}
+                      onClick={() => document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })}
                       className="inline-flex items-center text-gray-600 font-medium text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] border-b-2 border-gray-300 pb-2 hover:text-black hover:border-black transition-colors"
                     >
                       <svg className="mr-3 md:mr-4 w-3 md:w-4 h-3 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -419,7 +418,7 @@ export default function Home() {
                   Explore Compliance Tools
                 </Link>
                 <button 
-                  onClick={() => setIsFormOpen(true)}
+                  onClick={() => document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' })}
                   className="w-full inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 border-2 border-white text-white font-medium text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
                 >
                   Schedule Expert Consultation
@@ -430,106 +429,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Consultation Form Modal */}
-      {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border-4 border-black p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl md:text-2xl font-black uppercase tracking-[0.1em]">Schedule Consultation</h3>
-              <button 
-                onClick={() => setIsFormOpen(false)}
-                className="text-gray-500 hover:text-black transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+
+      {/* Consultation Form Section */}
+      <section id="consultation-form" className="px-4 md:px-12 py-12 md:py-20 bg-black text-white">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black mb-2 md:mb-4 tracking-tight">SCHEDULE YOUR</h2>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light italic tracking-tight">Expert Consultation</h2>
+            <div className="w-24 md:w-32 h-0.5 bg-white mx-auto mt-6 md:mt-8"></div>
+            <p className="text-lg md:text-xl font-light text-gray-300 max-w-2xl mx-auto leading-relaxed px-4 mt-6">
+              Get personalized compliance guidance from our experts. We'll help you navigate GDPR, DORA, and other European regulations with confidence.
+            </p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+            <div>
+              <label htmlFor="form-name" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-300 mb-2">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                id="form-name"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full bg-white text-black border-2 border-white p-3 text-sm focus:outline-none focus:border-gray-300 transition-colors"
+                placeholder="Enter your full name"
+              />
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your full name"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="company" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Company *
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  required
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your company name"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your email address"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="phone" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              
-              <div className="flex space-x-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsFormOpen(false)}
-                  className="flex-1 border-2 border-black text-black px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-black text-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-800 transition-colors"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
+            <div>
+              <label htmlFor="form-company" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-300 mb-2">
+                Company *
+              </label>
+              <input
+                type="text"
+                id="form-company"
+                name="company"
+                required
+                value={formData.company}
+                onChange={handleChange}
+                className="w-full bg-white text-black border-2 border-white p-3 text-sm focus:outline-none focus:border-gray-300 transition-colors"
+                placeholder="Enter your company name"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="form-email" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-300 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                id="form-email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full bg-white text-black border-2 border-white p-3 text-sm focus:outline-none focus:border-gray-300 transition-colors"
+                placeholder="Enter your email address"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="form-phone" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-300 mb-2">
+                Phone Number *
+              </label>
+              <input
+                type="tel"
+                id="form-phone"
+                name="phone"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full bg-white text-black border-2 border-white p-3 text-sm focus:outline-none focus:border-gray-300 transition-colors"
+                placeholder="Enter your phone number"
+              />
+            </div>
+            
+            <button
+              type="submit"
+              className="w-full bg-white text-black px-6 py-4 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors"
+            >
+              Schedule Consultation
+            </button>
+          </form>
         </div>
-      )}
+      </section>
 
       {/* Footer */}
       <footer className="px-4 md:px-12 py-6 bg-gray-50 border-t">
@@ -556,107 +542,6 @@ export default function Home() {
         isOpen={isUserTypeModalOpen} 
         onUserTypeSelect={handleUserTypeSelection} 
       />
-
-      {/* Consultation Form Modal */}
-      {isFormOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white border-4 border-black p-6 md:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl md:text-2xl font-black uppercase tracking-[0.1em]">Schedule Consultation</h3>
-              <button 
-                onClick={() => setIsFormOpen(false)}
-                className="text-gray-500 hover:text-black transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your full name"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="company" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Company *
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  required
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your company name"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your email address"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="phone" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full border-2 border-black p-3 text-sm focus:outline-none focus:border-gray-600 transition-colors"
-                  placeholder="Enter your phone number"
-                />
-              </div>
-              
-              <div className="flex space-x-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsFormOpen(false)}
-                  className="flex-1 border-2 border-black text-black px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-black text-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-800 transition-colors"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -2,8 +2,21 @@
 
 import Link from "next/link"
 
+interface Tool {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  link: string;
+  isExternal?: boolean;
+  frameworks: string[];
+  additionalInfo?: string;
+  additional?: string;
+  icon: React.ReactNode;
+}
+
 export default function ToolsPage() {
-  const tools = [
+  const tools: Tool[] = [
     {
       id: "data-breach-calculator",
       title: "Data Breach Calculator",
@@ -35,8 +48,9 @@ export default function ToolsPage() {
       id: "compliance-checker",
       title: "Compliance Checker",
       description: "Verify your compliance status across multiple regulatory frameworks with AI-powered assessments.",
-      status: "coming-soon",
-      link: "/coming-soon",
+      status: "available",
+      link: "https://beta-gapanalyser.intgen.ai/",
+      isExternal: true,
       frameworks: ["GDPR", "EU AI ACT", "DORA", "NIS"],
       additionalInfo: "Other major frameworks if any.",
       icon: (
@@ -122,55 +136,62 @@ export default function ToolsPage() {
 
           {/* Tools Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {tools.map((tool) => (
-              <article key={tool.id} className="border-4 border-black bg-white hover:shadow-lg transition-shadow">
-                <Link href={tool.link} className="block p-6 md:p-8">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-black flex items-center justify-center text-white">
-                      {tool.icon}
-                    </div>
-                    {tool.status === "available" ? (
-                      <span className="bg-green-100 text-green-800 text-xs font-black uppercase tracking-[0.1em] px-3 py-1 border-2 border-green-800">
-                        Available
-                      </span>
-                    ) : (
-                      <span className="bg-gray-100 text-gray-600 text-xs font-black uppercase tracking-[0.1em] px-3 py-1 border-2 border-gray-400">
-                        Coming Soon
-                      </span>
-                    )}
-                  </div>
-                  
-                  <h3 className="text-xl font-black mb-3 uppercase tracking-[0.05em]">{tool.title}</h3>
-                  <p className="text-gray-700 mb-4 leading-relaxed font-light">{tool.description}</p>
-                  
-                  <div className="space-y-2">
-                    <div className="text-xs uppercase tracking-[0.1em] font-black text-gray-500">
-                      Select framework:
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {tool.frameworks.map((framework) => (
-                        <span key={framework} className="text-xs bg-gray-100 px-2 py-1 border border-gray-300">
-                          {framework}
+            {tools.map((tool) => {
+              const LinkWrapper = tool.isExternal ? 'a' : Link;
+              const linkProps = tool.isExternal 
+                ? { href: tool.link, target: "_blank", rel: "noopener noreferrer" } 
+                : { href: tool.link };
+              
+              return (
+                <article key={tool.id} className="border-4 border-black bg-white hover:shadow-lg transition-shadow">
+                  <LinkWrapper {...linkProps} className="block p-6 md:p-8">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-black flex items-center justify-center text-white">
+                        {tool.icon}
+                      </div>
+                      {tool.status === "available" ? (
+                        <span className="bg-green-100 text-green-800 text-xs font-black uppercase tracking-[0.1em] px-3 py-1 border-2 border-green-800">
+                          Available
                         </span>
-                      ))}
+                      ) : (
+                        <span className="bg-gray-100 text-gray-600 text-xs font-black uppercase tracking-[0.1em] px-3 py-1 border-2 border-gray-400">
+                          Coming Soon
+                        </span>
+                      )}
                     </div>
-                    {tool.additionalInfo && (
-                      <p className="text-xs text-gray-500 italic mt-2">{tool.additionalInfo}</p>
-                    )}
-                    {tool.additional && (
-                      <p className="text-xs text-gray-500 italic">{tool.additional}</p>
-                    )}
-                  </div>
-                  
-                  <div className="mt-6 flex items-center text-black font-medium text-sm uppercase tracking-[0.1em]">
-                    <span>{tool.status === "available" ? "Use Tool" : "Learn More"}</span>
-                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </Link>
-              </article>
-            ))}
+                    
+                    <h3 className="text-xl font-black mb-3 uppercase tracking-[0.05em]">{tool.title}</h3>
+                    <p className="text-gray-700 mb-4 leading-relaxed font-light">{tool.description}</p>
+                    
+                    <div className="space-y-2">
+                      <div className="text-xs uppercase tracking-[0.1em] font-black text-gray-500">
+                        Select framework:
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {tool.frameworks.map((framework) => (
+                          <span key={framework} className="text-xs bg-gray-100 px-2 py-1 border border-gray-300">
+                            {framework}
+                          </span>
+                        ))}
+                      </div>
+                      {tool.additionalInfo && (
+                        <p className="text-xs text-gray-500 italic mt-2">{tool.additionalInfo}</p>
+                      )}
+                      {tool.additional && (
+                        <p className="text-xs text-gray-500 italic">{tool.additional}</p>
+                      )}
+                    </div>
+                    
+                    <div className="mt-6 flex items-center text-black font-medium text-sm uppercase tracking-[0.1em]">
+                      <span>{tool.status === "available" ? "Use Tool" : "Learn More"}</span>
+                      <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </LinkWrapper>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
