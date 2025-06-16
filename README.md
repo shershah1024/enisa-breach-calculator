@@ -1,6 +1,6 @@
-# ENISA Data Breach Risk Calculator
+# Data Breach Risk Calculator
 
-A Next.js application that helps organizations assess the severity of data breaches and determine notification requirements according to GDPR and ENISA methodology.
+A Next.js application that helps organizations assess the severity of data breaches and determine notification requirements according to GDPR.
 
 ## Features
 
@@ -9,7 +9,7 @@ A Next.js application that helps organizations assess the severity of data breac
 - **Risk Factors**: Evaluates increasing and decreasing factors that affect breach severity
 - **Identification Risk**: Assesses how easily individuals can be identified
 - **Breach Circumstances**: Evaluates the specific circumstances of the breach
-- **Automated Risk Calculation**: Calculates risk level based on ENISA methodology
+- **Automated Risk Calculation**: Calculates risk level based on comprehensive risk assessment methodology
 - **Clear Action Items**: Provides specific notification requirements based on risk level
 
 ## Risk Levels
@@ -59,9 +59,9 @@ Open [http://localhost:3000](http://localhost:3000) to use the calculator.
 4. **Breach Details**: Provide information about how the breach occurred
 5. **View Results**: See risk level and required actions
 
-## Based on ENISA Methodology
+## Based on GDPR Requirements
 
-This calculator implements the European Union Agency for Cybersecurity (ENISA) personal data breach notification methodology, helping organizations comply with GDPR Article 33 and 34 requirements.
+This calculator implements a comprehensive risk assessment methodology to help organizations comply with GDPR Article 33 and 34 requirements for data breach notifications.
 
 ## License
 

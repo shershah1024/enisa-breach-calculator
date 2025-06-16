@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, Calculator, Check, ChevronRight, ChevronLeft, CreditCard, User, Activity, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
+import Link from 'next/link';
 
 interface Responses {
   [key: string]: string;
@@ -242,8 +243,8 @@ const DataBreachCalculator = () => {
       yPosition = 20;
     }
     yPosition += 10;
-    addText('Generated using ENISA Data Breach Risk Calculator', 8);
-    addText('Compliant with GDPR Articles 33-34 and ENISA recommendations', 8);
+    addText('Generated using Data Breach Risk Calculator', 8);
+    addText('Compliant with GDPR Articles 33-34', 8);
 
     // Save the PDF
     pdf.save(`GDPR-breach-notification-template-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -703,7 +704,7 @@ const DataBreachCalculator = () => {
 
     setFinalScore(final);
 
-    // Determine risk level and notifications based on ENISA methodology
+    // Determine risk level and notifications based on risk assessment methodology
     let risk, actions = [];
     const hasSpecialCategories = selectedDataTypes.includes('sensitive');
     
@@ -881,13 +882,13 @@ const DataBreachCalculator = () => {
   };
 
   const MultiChoiceCard = ({ question }: { question: Question }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-      <div className="mb-4">
-        <h4 className="font-medium text-gray-900 mb-2">{question.question}</h4>
-        <p className="text-sm text-gray-600">{question.explanation}</p>
+    <div className="bg-white border-4 border-black p-6 mb-6">
+      <div className="mb-6">
+        <h4 className="font-black text-gray-900 mb-3 text-lg uppercase tracking-[0.05em]">{question.question}</h4>
+        <p className="text-sm text-gray-700 font-light leading-relaxed">{question.explanation}</p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {question.scores && Object.entries(question.scores).map(([key, _]) => {
           const getOptionLabel = (questionId: string, optionKey: string) => {
             if (questionId === 'cb_availability') {
@@ -948,16 +949,16 @@ const DataBreachCalculator = () => {
           };
 
           return (
-            <label key={key} className="flex items-start gap-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50">
+            <label key={key} className="flex items-start gap-4 cursor-pointer p-4 border-2 border-gray-200 hover:border-black hover:bg-gray-50 transition-colors">
               <input
                 type="radio"
                 name={question.id}
                 value={key}
                 checked={responses[question.id] === key}
                 onChange={() => handleResponse(question.id, key)}
-                className="text-blue-600 mt-1 flex-shrink-0"
+                className="text-black mt-1 flex-shrink-0 scale-125"
               />
-              <span className="text-gray-700 leading-relaxed">
+              <span className="text-gray-800 leading-relaxed font-light">
                 {getOptionLabel(question.id, key)}
               </span>
             </label>
@@ -968,16 +969,16 @@ const DataBreachCalculator = () => {
   );
 
   const QuestionCard = ({ question }: { question: Question }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-      <div className="mb-3">
-        <h4 className="font-medium text-gray-900 mb-2">{question.question}</h4>
-        <p className="text-sm text-gray-600 mb-3">{question.explanation}</p>
+    <div className="bg-white border-4 border-black p-6 mb-6">
+      <div className="mb-4">
+        <h4 className="font-black text-gray-900 mb-3 text-lg uppercase tracking-[0.05em]">{question.question}</h4>
+        <p className="text-sm text-gray-700 mb-4 font-light leading-relaxed">{question.explanation}</p>
         
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
-          <ul className="text-sm space-y-1">
+        <div className="p-4 bg-gray-50 border-2 border-gray-200">
+          <h5 className="font-black text-gray-700 mb-3 text-sm uppercase tracking-[0.1em]">Examples:</h5>
+          <ul className="text-sm space-y-2">
             {question.examples.map((example: string, index: number) => (
-              <li key={index} className={example.startsWith('✓') ? 'text-green-700' : 'text-red-700'}>
+              <li key={index} className={`font-medium ${example.startsWith('✓') ? 'text-green-700' : 'text-red-700'}`}>
                 {example}
               </li>
             ))}
@@ -985,28 +986,28 @@ const DataBreachCalculator = () => {
         </div>
       </div>
 
-      <div className="flex gap-6">
-        <label className="flex items-center gap-2 cursor-pointer">
+      <div className="flex gap-8">
+        <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-transparent hover:border-green-600 hover:bg-green-50 transition-colors">
           <input
             type="radio"
             name={question.id}
             value="yes"
             checked={responses[question.id] === 'yes'}
             onChange={() => handleResponse(question.id, 'yes')}
-            className="text-green-600"
+            className="text-green-600 scale-125"
           />
-          <span className="text-green-700 font-medium">Yes</span>
+          <span className="text-green-700 font-black uppercase tracking-[0.1em] text-sm">Yes</span>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex items-center gap-3 cursor-pointer p-3 border-2 border-transparent hover:border-red-600 hover:bg-red-50 transition-colors">
           <input
             type="radio"
             name={question.id}
             value="no"
             checked={responses[question.id] === 'no'}
             onChange={() => handleResponse(question.id, 'no')}
-            className="text-red-600"
+            className="text-red-600 scale-125"
           />
-          <span className="text-red-700 font-medium">No</span>
+          <span className="text-red-700 font-black uppercase tracking-[0.1em] text-sm">No</span>
         </label>
       </div>
     </div>
@@ -1018,22 +1019,22 @@ const DataBreachCalculator = () => {
       case 0: // Sector & Scale
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-6">Tell us about your organization and the breach</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-blue-800">
-                <strong>Why this matters:</strong> Different sectors have specific regulatory requirements under GDPR. The scale of the breach also affects notification requirements.
+            <h2 className="text-2xl md:text-3xl font-black mb-6 uppercase tracking-[0.05em] md:tracking-[0.1em]">Tell us about your organization and the breach</h2>
+            <div className="bg-gray-50 border-4 border-black p-4 mb-6">
+              <p className="text-gray-800 font-light">
+                <strong className="font-black">Why this matters:</strong> Different sectors have specific regulatory requirements under GDPR. The scale of the breach also affects notification requirements.
               </p>
             </div>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
                   What sector is your organization in?
                 </label>
                 <select
                   value={businessSector}
                   onChange={(e) => setBusinessSector(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border-2 border-black focus:outline-none focus:border-gray-600 transition-colors font-medium"
                 >
                   <option value="">Select your sector...</option>
                   {businessSectors.map(sector => (
@@ -1045,13 +1046,13 @@ const DataBreachCalculator = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-black uppercase tracking-[0.1em] text-gray-700 mb-2">
                   Approximately how many people are affected?
                 </label>
                 <select
                   value={affectedCount}
                   onChange={(e) => setAffectedCount(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border-2 border-black focus:outline-none focus:border-gray-600 transition-colors font-medium"
                 >
                   <option value="">Select range...</option>
                   <option value="1">1-10 individuals</option>
@@ -1070,10 +1071,10 @@ const DataBreachCalculator = () => {
       case 1: // Data Selection
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-6">What types of information were involved in the breach?</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-blue-800">
-                <strong>Select all that apply:</strong> Most data breaches involve multiple types of information. Choose every category that was exposed, even if only some records contained that data type. This helps us calculate the most accurate risk level.
+            <h2 className="text-2xl md:text-3xl font-black mb-6 uppercase tracking-[0.05em] md:tracking-[0.1em]">What types of information were involved in the breach?</h2>
+            <div className="bg-gray-50 border-4 border-black p-4 mb-6">
+              <p className="text-gray-800 font-light">
+                <strong className="font-black">Select all that apply:</strong> Most data breaches involve multiple types of information. Choose every category that was exposed, even if only some records contained that data type. This helps us calculate the most accurate risk level.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -1081,19 +1082,19 @@ const DataBreachCalculator = () => {
                 <div 
                   key={dataType.id}
                   onClick={() => toggleDataType(dataType.id)}
-                  className={`border-2 rounded-lg p-6 transition-all cursor-pointer ${
+                  className={`border-4 p-6 transition-all cursor-pointer ${
                     selectedDataTypes.includes(dataType.id) 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-black bg-gray-50' 
+                      : 'border-gray-200 bg-white hover:border-gray-400'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <dataType.icon size={24} className={selectedDataTypes.includes(dataType.id) ? 'text-blue-600' : 'text-gray-600'} />
-                      <h3 className="font-semibold text-lg">{dataType.name}</h3>
+                      <dataType.icon size={24} className={selectedDataTypes.includes(dataType.id) ? 'text-black' : 'text-gray-600'} />
+                      <h3 className="font-black text-lg uppercase tracking-[0.05em]">{dataType.name}</h3>
                     </div>
-                    <div className={`w-6 h-6 rounded border-2 ${
-                      selectedDataTypes.includes(dataType.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-300 bg-white'
+                    <div className={`w-6 h-6 border-2 ${
+                      selectedDataTypes.includes(dataType.id) ? 'bg-black border-black' : 'border-gray-300 bg-white'
                     } flex items-center justify-center`}>
                       {selectedDataTypes.includes(dataType.id) && <Check size={16} className="text-white" />}
                     </div>
@@ -1152,28 +1153,28 @@ const DataBreachCalculator = () => {
           <div>
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold">Questions about {currentDataType.name}</h2>
-                <div className="text-sm text-gray-500">
+                <h2 className="text-2xl md:text-3xl font-black uppercase tracking-[0.05em] md:tracking-[0.1em]">Questions about {currentDataType.name}</h2>
+                <div className="text-xs md:text-sm font-black uppercase tracking-[0.15em] text-gray-500">
                   Data type {currentDataTypeIndex + 1} of {selectedDataTypes.length}
                 </div>
               </div>
               
               {/* Progress bar for data types */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div className="w-full bg-gray-200 h-1 mb-4">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-black h-1 transition-all duration-300"
                   style={{ width: `${((currentDataTypeIndex + 1) / selectedDataTypes.length) * 100}%` }}
                 ></div>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="bg-gray-50 border-4 border-black p-4 mb-6">
                 <div className="flex items-center gap-3 mb-2">
-                  <currentDataType.icon size={20} className="text-blue-600" />
-                  <h3 className="font-semibold text-blue-900">{currentDataType.name}</h3>
+                  <currentDataType.icon size={20} className="text-black" />
+                  <h3 className="font-black text-gray-900 uppercase tracking-[0.05em]">{currentDataType.name}</h3>
                 </div>
-                <p className="text-blue-800 text-sm">{currentDataType.description}</p>
+                <p className="text-gray-800 text-sm font-light">{currentDataType.description}</p>
                 {currentDataType.gdprCategory && (
-                  <div className="mt-2 text-xs text-blue-700">
+                  <div className="mt-2 text-xs text-gray-700 font-medium uppercase tracking-[0.1em]">
                     {currentDataType.gdprCategory}
                   </div>
                 )}
@@ -1182,7 +1183,7 @@ const DataBreachCalculator = () => {
             
             {questions.length > 0 ? (
               <div>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-700 mb-6 font-light leading-relaxed">
                   These questions help us understand exactly what was exposed and calculate a more accurate risk level. Choose the option that best matches your situation.
                 </p>
                 {questions.map((q: Question) => (
@@ -1203,39 +1204,44 @@ const DataBreachCalculator = () => {
       case 3: // Risk Factors
         return (
           <div>
-            <h2 className="text-2xl font-semibold mb-6">What factors might increase or decrease the risk?</h2>
-            <p className="text-gray-600 mb-8">These factors can make the breach more or less serious.</p>
+            <h2 className="text-2xl md:text-3xl font-black mb-6 uppercase tracking-[0.05em] md:tracking-[0.1em]">What factors might increase or decrease the risk?</h2>
+            <p className="text-gray-700 mb-8 font-light leading-relaxed">These factors can make the breach more or less serious.</p>
             
             <div className="mb-8">
-              <div className="bg-orange-50 rounded-lg p-4">
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h3 className="text-lg md:text-xl font-black mb-4 uppercase tracking-[0.05em] flex items-center gap-3">
+                    <AlertTriangle size={24} className="text-orange-600" />
+                    Risk Increasing Factors
+                  </h3>
+                </div>
                 {modifyingFactors.increasing.map(factor => (
-                  <div key={factor.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                  <div key={factor.id} className="bg-white border-4 border-black p-6 mb-6">
                     <div className="mb-4">
-                      <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                        <AlertTriangle size={20} className="text-orange-600" />
+                      <h4 className="font-black text-gray-900 mb-3 text-lg uppercase tracking-[0.05em]">
                         {factor.question}
                       </h4>
-                      <p className="text-sm text-gray-600">{factor.explanation}</p>
+                      <p className="text-sm text-gray-700 font-light leading-relaxed">{factor.explanation}</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50">
-                        <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <label className="flex flex-col gap-4 cursor-pointer p-6 border-2 border-gray-200 hover:border-green-600 hover:bg-green-50 transition-colors">
+                        <div className="flex items-center gap-3">
                           <input
                             type="radio"
                             name={factor.id}
                             value="yes"
                             checked={responses[factor.id] === 'yes'}
                             onChange={() => handleResponse(factor.id, 'yes')}
-                            className="text-green-600"
+                            className="text-green-600 scale-125"
                           />
-                          <span className="text-green-700 font-medium">Yes</span>
+                          <span className="text-green-700 font-black uppercase tracking-[0.1em] text-sm">Yes</span>
                         </div>
-                        <div className="ml-6">
-                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
-                          <ul className="text-sm space-y-1">
+                        <div className="ml-8">
+                          <h5 className="font-black text-gray-700 mb-3 text-sm uppercase tracking-[0.1em]">Examples:</h5>
+                          <ul className="text-sm space-y-2">
                             {factor.examples.filter((example: string) => example.startsWith('✓')).map((example: string, index: number) => (
-                              <li key={index} className="text-green-700">
+                              <li key={index} className="text-green-700 font-medium">
                                 {example.substring(2)}
                               </li>
                             ))}
@@ -1243,23 +1249,23 @@ const DataBreachCalculator = () => {
                         </div>
                       </label>
 
-                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50">
-                        <div className="flex items-center gap-2">
+                      <label className="flex flex-col gap-4 cursor-pointer p-6 border-2 border-gray-200 hover:border-red-600 hover:bg-red-50 transition-colors">
+                        <div className="flex items-center gap-3">
                           <input
                             type="radio"
                             name={factor.id}
                             value="no"
                             checked={responses[factor.id] === 'no'}
                             onChange={() => handleResponse(factor.id, 'no')}
-                            className="text-red-600"
+                            className="text-red-600 scale-125"
                           />
-                          <span className="text-red-700 font-medium">No</span>
+                          <span className="text-red-700 font-black uppercase tracking-[0.1em] text-sm">No</span>
                         </div>
-                        <div className="ml-6">
-                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
-                          <ul className="text-sm space-y-1">
+                        <div className="ml-8">
+                          <h5 className="font-black text-gray-700 mb-3 text-sm uppercase tracking-[0.1em]">Examples:</h5>
+                          <ul className="text-sm space-y-2">
                             {factor.examples.filter((example: string) => example.startsWith('✗')).map((example: string, index: number) => (
-                              <li key={index} className="text-red-700">
+                              <li key={index} className="text-red-700 font-medium">
                                 {example.substring(2)}
                               </li>
                             ))}
@@ -1273,35 +1279,40 @@ const DataBreachCalculator = () => {
             </div>
 
             <div>
-              <div className="bg-green-50 rounded-lg p-4">
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h3 className="text-lg md:text-xl font-black mb-4 uppercase tracking-[0.05em] flex items-center gap-3">
+                    <Shield size={24} className="text-green-600" />
+                    Risk Decreasing Factors
+                  </h3>
+                </div>
                 {modifyingFactors.decreasing.map(factor => (
-                  <div key={factor.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                  <div key={factor.id} className="bg-white border-4 border-black p-6 mb-6">
                     <div className="mb-4">
-                      <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                        <Shield size={20} className="text-green-600" />
+                      <h4 className="font-black text-gray-900 mb-3 text-lg uppercase tracking-[0.05em]">
                         {factor.question}
                       </h4>
-                      <p className="text-sm text-gray-600">{factor.explanation}</p>
+                      <p className="text-sm text-gray-700 font-light leading-relaxed">{factor.explanation}</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50">
-                        <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <label className="flex flex-col gap-4 cursor-pointer p-6 border-2 border-gray-200 hover:border-green-600 hover:bg-green-50 transition-colors">
+                        <div className="flex items-center gap-3">
                           <input
                             type="radio"
                             name={factor.id}
                             value="yes"
                             checked={responses[factor.id] === 'yes'}
                             onChange={() => handleResponse(factor.id, 'yes')}
-                            className="text-green-600"
+                            className="text-green-600 scale-125"
                           />
-                          <span className="text-green-700 font-medium">Yes</span>
+                          <span className="text-green-700 font-black uppercase tracking-[0.1em] text-sm">Yes</span>
                         </div>
-                        <div className="ml-6">
-                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
-                          <ul className="text-sm space-y-1">
+                        <div className="ml-8">
+                          <h5 className="font-black text-gray-700 mb-3 text-sm uppercase tracking-[0.1em]">Examples:</h5>
+                          <ul className="text-sm space-y-2">
                             {factor.examples.filter((example: string) => example.startsWith('✓')).map((example: string, index: number) => (
-                              <li key={index} className="text-green-700">
+                              <li key={index} className="text-green-700 font-medium">
                                 {example.substring(2)}
                               </li>
                             ))}
@@ -1309,23 +1320,23 @@ const DataBreachCalculator = () => {
                         </div>
                       </label>
 
-                      <label className="flex flex-col gap-3 cursor-pointer p-4 rounded-lg border border-gray-200 hover:border-red-300 hover:bg-red-50">
-                        <div className="flex items-center gap-2">
+                      <label className="flex flex-col gap-4 cursor-pointer p-6 border-2 border-gray-200 hover:border-red-600 hover:bg-red-50 transition-colors">
+                        <div className="flex items-center gap-3">
                           <input
                             type="radio"
                             name={factor.id}
                             value="no"
                             checked={responses[factor.id] === 'no'}
                             onChange={() => handleResponse(factor.id, 'no')}
-                            className="text-red-600"
+                            className="text-red-600 scale-125"
                           />
-                          <span className="text-red-700 font-medium">No</span>
+                          <span className="text-red-700 font-black uppercase tracking-[0.1em] text-sm">No</span>
                         </div>
-                        <div className="ml-6">
-                          <h5 className="font-medium text-gray-700 mb-2 text-sm">Examples:</h5>
-                          <ul className="text-sm space-y-1">
+                        <div className="ml-8">
+                          <h5 className="font-black text-gray-700 mb-3 text-sm uppercase tracking-[0.1em]">Examples:</h5>
+                          <ul className="text-sm space-y-2">
                             {factor.examples.filter((example: string) => example.startsWith('✗')).map((example: string, index: number) => (
-                              <li key={index} className="text-red-700">
+                              <li key={index} className="text-red-700 font-medium">
                                 {example.substring(2)}
                               </li>
                             ))}
@@ -1554,7 +1565,7 @@ const DataBreachCalculator = () => {
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-2">ENISA Score Calculation</h3>
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">Risk Score Calculation</h3>
                   <p className="text-blue-800 text-sm mb-3">SE = DPC × EI + CB</p>
                   <div className="text-2xl font-bold text-blue-900">
                     Final Score: {finalScore.toFixed(2)}
@@ -2035,72 +2046,123 @@ const DataBreachCalculator = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-6 bg-gray-50 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-          <Shield className="text-blue-600" />
-          <span className="hidden sm:inline">Data Breach Risk Calculator</span>
-          <span className="sm:hidden">Breach Calculator</span>
-        </h1>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-800 leading-relaxed">
-            <strong>What this tool does:</strong> This calculator helps you assess the severity of personal data breaches and determine your obligations under GDPR.
-          </p>
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="relative">
+        <div className="flex justify-between items-center px-4 md:px-12 py-6 md:py-8 border-b-4 border-black">
+          <Link href="/" className="flex items-center space-x-2 md:space-x-4">
+            <div className="text-2xl md:text-4xl font-black">INTGEN</div>
+            <div className="text-2xl md:text-4xl font-light">AI</div>
+            <div className="ml-2 md:ml-4 text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-gray-600 leading-tight">
+              Compliance
+              <br />
+              Excellence
+            </div>
+          </Link>
+          
+          <div className="flex items-center space-x-4 md:space-x-8">
+            <Link
+              href="/"
+              className="text-sm uppercase tracking-[0.2em] text-gray-700 hover:text-black transition-colors font-medium border-b-2 border-transparent hover:border-black pb-1"
+            >
+              Home
+            </Link>
+          </div>
         </div>
-      </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="px-4 md:px-12 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="space-y-6 md:space-y-8">
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="w-1 h-12 md:h-16 bg-black"></div>
+              <div>
+                <div className="text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] text-black font-medium">
+                  🛡️ GDPR Data Breach Assessment
+                </div>
+              </div>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.85] tracking-tight">
+              DATA BREACH
+              <br />
+              <span className="font-light italic">Risk Calculator</span>
+            </h1>
+
+            <div className="flex items-center space-x-4 md:space-x-8">
+              <div className="w-16 md:w-24 h-0.5 bg-black"></div>
+              <div className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-gray-500">
+                Assess GDPR Compliance Requirements
+              </div>
+            </div>
+
+            <div className="max-w-2xl">
+              <p className="text-base md:text-lg leading-relaxed text-gray-800 font-light">
+                Evaluate the severity of personal data breaches and determine your notification obligations under GDPR. 
+                Our intelligent assessment considers all regulatory factors to provide precise compliance guidance.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
 
       {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-8 mb-8">
-        {renderStep()}
-      </div>
+      <section className="px-4 md:px-12 py-8 md:py-12 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white border-4 border-black p-6 md:p-8 mb-8">
+            {renderStep()}
+          </div>
 
-      {/* Validation Message */}
-      {validationMessage && (
-        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
-            <p className="text-amber-800">{validationMessage}</p>
+          {/* Validation Message */}
+          {validationMessage && (
+            <div className="mb-4 p-4 bg-amber-50 border-4 border-amber-200">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-amber-800 font-medium">{validationMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 0}
+              className={`flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors ${
+                currentStep === 0 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200' 
+                  : 'bg-white text-black border-2 border-black hover:bg-gray-100'
+              }`}
+            >
+              <ChevronLeft size={20} />
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">Back</span>
+            </button>
+            
+            {(currentStep < steps.length - 1 || (currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1)) && (
+              <button
+                onClick={nextStep}
+                disabled={!canProceed()}
+                className={`flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors ${
+                  canProceed() 
+                    ? 'bg-black text-white hover:bg-gray-800' 
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200'
+                }`}
+              >
+                <span className="hidden sm:inline">
+                  {currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1 ? 'Next Data Type' : 'Next'}
+                </span>
+                <span className="sm:hidden">
+                  {currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1 ? 'Next Type' : 'Continue'}
+                </span>
+                <ChevronRight size={20} />
+              </button>
+            )}
           </div>
         </div>
-      )}
-
-      {/* Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <button
-          onClick={prevStep}
-          disabled={currentStep === 0}
-          className={`flex items-center justify-center gap-2 px-4 md:px-6 py-3 rounded-lg font-medium ${
-            currentStep === 0 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'bg-gray-600 text-white hover:bg-gray-700'
-          }`}
-        >
-          <ChevronLeft size={20} />
-          <span className="hidden sm:inline">Previous</span>
-          <span className="sm:hidden">Back</span>
-        </button>
-        
-        {(currentStep < steps.length - 1 || (currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1)) && (
-          <button
-            onClick={nextStep}
-            disabled={!canProceed()}
-            className={`flex items-center justify-center gap-2 px-4 md:px-6 py-3 rounded-lg font-medium ${
-              canProceed() 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <span className="hidden sm:inline">
-              {currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1 ? 'Next Data Type' : 'Next'}
-            </span>
-            <span className="sm:hidden">
-              {currentStep === 2 && currentDataTypeIndex < selectedDataTypes.length - 1 ? 'Next Type' : 'Continue'}
-            </span>
-            <ChevronRight size={20} />
-          </button>
-        )}
-      </div>
+      </section>
     </div>
   );
 };

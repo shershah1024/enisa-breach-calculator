@@ -65,7 +65,7 @@ export default function Home() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-12">
             <Link
-              href="/calculator"
+              href="/tools"
               className="text-sm uppercase tracking-[0.2em] text-gray-700 hover:text-black transition-colors font-medium border-b-2 border-transparent hover:border-black pb-1"
             >
               Compliance Tools
@@ -100,7 +100,7 @@ export default function Home() {
           <div className="md:hidden bg-white border-b-4 border-black">
             <div className="px-4 py-6 space-y-4">
               <Link
-                href="/calculator"
+                href="/tools"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block text-sm uppercase tracking-[0.2em] text-gray-700 hover:text-black transition-colors font-medium border-b-2 border-transparent hover:border-black pb-1"
               >

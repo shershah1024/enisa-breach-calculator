@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
     // Calculate final score
     const finalScore = (data.dpcScore * data.eiScore) + data.cbScore;
     
-    // Enhanced risk level determination based on ENISA methodology
+    // Enhanced risk level determination based on risk assessment methodology
     let riskLevel: string;
     let notifications: string[] = [];
     const hasSpecialCategories = data.selectedDataTypes.includes('sensitive');
     
-    // ENISA-compliant risk assessment
+    // Risk assessment based on severity
     if (finalScore <= 1 && !hasSpecialCategories) {
       riskLevel = 'Low';
       notifications = ['Document the breach internally (GDPR Article 33(5))'];
