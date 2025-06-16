@@ -882,6 +882,34 @@ const DataBreachCalculator = () => {
     }
   };
 
+  const handleEditNavigation = (editType: string) => {
+    setValidationMessage(''); // Clear any validation message
+    
+    switch (editType) {
+      case 'sector':
+        setCurrentStep(0); // Go to Sector & Scale
+        break;
+      case 'dataTypes':
+        setCurrentStep(1); // Go to Data Selection
+        break;
+      case 'dataDetails':
+        setCurrentStep(2); // Go to Data Details
+        setCurrentDataTypeIndex(0); // Start from first data type
+        break;
+      case 'riskFactors':
+        setCurrentStep(3); // Go to Risk Factors
+        break;
+      case 'identification':
+        setCurrentStep(4); // Go to Ease of Identification
+        break;
+      case 'circumstances':
+        setCurrentStep(5); // Go to Breach Circumstances
+        break;
+      default:
+        break;
+    }
+  };
+
   const MultiChoiceCard = ({ question }: { question: Question }) => (
     <div className="bg-white border-4 border-black p-6 mb-6">
       <div className="mb-6">
@@ -1603,7 +1631,7 @@ const DataBreachCalculator = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-gray-900">Organization & Scale</h4>
                     <button 
-                      onClick={() => setEditModalOpen('organization')}
+                      onClick={() => handleEditNavigation('sector')}
                       className="text-blue-600 hover:text-blue-800 text-sm underline"
                     >
                       Edit
@@ -1627,7 +1655,7 @@ const DataBreachCalculator = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-gray-900">Data Types Involved</h4>
                     <button 
-                      onClick={() => setEditModalOpen('dataTypes')}
+                      onClick={() => handleEditNavigation('dataTypes')}
                       className="text-blue-600 hover:text-blue-800 text-sm underline"
                     >
                       Edit
@@ -1655,7 +1683,7 @@ const DataBreachCalculator = () => {
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-semibold text-gray-900">Data Type Details</h4>
                       <button 
-                        onClick={() => setEditModalOpen('dataDetails')}
+                        onClick={() => handleEditNavigation('dataDetails')}
                         className="text-blue-600 hover:text-blue-800 text-sm underline"
                       >
                         Edit
@@ -1729,7 +1757,7 @@ const DataBreachCalculator = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-gray-900">Risk Factors</h4>
                     <button 
-                      onClick={() => setEditModalOpen('riskFactors')}
+                      onClick={() => handleEditNavigation('riskFactors')}
                       className="text-blue-600 hover:text-blue-800 text-sm underline"
                     >
                       Edit
@@ -1753,7 +1781,7 @@ const DataBreachCalculator = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-gray-900">Ease of Identification</h4>
                     <button 
-                      onClick={() => setEditModalOpen('identification')}
+                      onClick={() => handleEditNavigation('identification')}
                       className="text-blue-600 hover:text-blue-800 text-sm underline"
                     >
                       Edit
@@ -1783,7 +1811,7 @@ const DataBreachCalculator = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-gray-900">Breach Circumstances</h4>
                     <button 
-                      onClick={() => setEditModalOpen('circumstances')}
+                      onClick={() => handleEditNavigation('circumstances')}
                       className="text-blue-600 hover:text-blue-800 text-sm underline"
                     >
                       Edit
