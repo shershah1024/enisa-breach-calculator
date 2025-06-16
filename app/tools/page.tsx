@@ -7,7 +7,7 @@ export default function ToolsPage() {
     {
       id: "data-breach-calculator",
       title: "Data Breach Calculator",
-      description: "Calculate potential GDPR fines and understand regulatory penalties for data breaches.",
+      description: "Evaluate the severity of personal data breaches and determine your notification obligations under GDPR.",
       status: "available",
       link: "/calculator",
       frameworks: ["GDPR"],

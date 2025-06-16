@@ -408,22 +408,22 @@ export default function Home() {
               <h3 className="text-2xl md:text-3xl font-black mb-4 md:mb-6 uppercase tracking-[0.05em] md:tracking-[0.1em]">Ready to Get Started?</h3>
               <div className="w-12 md:w-16 h-0.5 bg-white mb-6 md:mb-8"></div>
               <p className="text-gray-300 mb-8 md:mb-12 leading-relaxed font-light text-base md:text-lg">
-                Schedule a confidential consultation with our compliance experts. We'll assess your current position and
-                provide a clear roadmap to regulatory excellence.
+                Explore our suite of AI-powered compliance tools or schedule a consultation with our experts. 
+                We'll help you navigate European regulations with confidence.
               </p>
               <div className="space-y-4 md:space-y-6">
+                <Link
+                  href="/tools"
+                  className="w-full inline-flex items-center justify-center bg-white text-black px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] hover:bg-gray-100 transition-colors"
+                >
+                  Explore Compliance Tools
+                </Link>
                 <button 
                   onClick={() => setIsFormOpen(true)}
-                  className="w-full bg-white text-black px-6 md:px-8 py-3 md:py-4 font-black text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] hover:bg-gray-100 transition-colors"
+                  className="w-full inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 border-2 border-white text-white font-medium text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
                 >
                   Schedule Expert Consultation
                 </button>
-                <Link
-                  href="/calculator"
-                  className="w-full inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 border-2 border-white text-white font-medium text-xs md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] hover:bg-white hover:text-black transition-colors"
-                >
-                  Try Data Breach Calculator
-                </Link>
               </div>
             </div>
           </div>
