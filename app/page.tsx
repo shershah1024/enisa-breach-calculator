@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import UserTypeModal from "./components/UserTypeModal"
+import { supabase } from "./utils/supabase"
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -11,18 +12,47 @@ export default function Home() {
     name: '',
     company: '',
     phone: '',
-    email: ''
+    email: '',
+    solution: ''
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    // Handle form submission here
-    alert('Thank you for your submission! We will contact you shortly.')
-    setFormData({ name: '', company: '', phone: '', email: '' })
+    setIsSubmitting(true)
+    
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .insert([
+          {
+            name: formData.name,
+            company: formData.company,
+            email_address: formData.email,
+            phone_number: formData.phone,
+            solution: formData.solution
+          }
+        ])
+      
+      if (error) throw error
+      
+      setShowSuccessMessage(true)
+      setFormData({ name: '', company: '', phone: '', email: '', solution: '' })
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false)
+      }, 5000)
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      alert('There was an error submitting your request. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -507,12 +537,36 @@ export default function Home() {
               />
             </div>
             
+            <div>
+              <label htmlFor="form-solution" className="block text-sm font-black uppercase tracking-[0.1em] text-gray-300 mb-2">
+                How can we help you? *
+              </label>
+              <textarea
+                id="form-solution"
+                name="solution"
+                required
+                value={formData.solution}
+                onChange={handleChange}
+                rows={4}
+                className="w-full bg-white text-black border-2 border-white p-3 text-sm focus:outline-none focus:border-gray-300 transition-colors resize-none"
+                placeholder="Describe your compliance needs or challenges"
+              />
+            </div>
+            
             <button
               type="submit"
-              className="w-full bg-white text-black px-6 py-4 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-white text-black px-6 py-4 text-sm font-black uppercase tracking-[0.1em] hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Schedule Consultation
+              {isSubmitting ? 'Submitting...' : 'Schedule Consultation'}
             </button>
+            
+            {showSuccessMessage && (
+              <div className="bg-green-500 text-white p-4 rounded text-center">
+                <p className="font-bold mb-1">Thank you for your submission!</p>
+                <p className="text-sm">We will respond to your request within 24 hours.</p>
+              </div>
+            )}
           </form>
         </div>
       </section>
