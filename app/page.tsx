@@ -91,7 +91,7 @@ export default function Home() {
     setIsUserTypeModalOpen(false)
     
     if (userType === 'compliance') {
-      window.location.href = 'https://intgen.ai'
+      window.location.href = 'https://services.intgen.ai'
     }
   }
 
