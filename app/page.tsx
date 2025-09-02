@@ -8,6 +8,7 @@ import { supabase } from "./utils/supabase"
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isUserTypeModalOpen, setIsUserTypeModalOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -60,14 +61,33 @@ export default function Home() {
   }
 
   useEffect(() => {
-    const hasVisited = localStorage.getItem('userTypeSelected')
-    if (!hasVisited) {
-      setIsUserTypeModalOpen(true)
+    // Check if user is logged in and show modal if not
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setIsLoggedIn(!!user)
+      // Always show modal when user is not logged in
+      if (!user) {
+        setIsUserTypeModalOpen(true)
+      }
     }
+    
+    checkAuth()
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session)
+      // Show modal when user logs out
+      if (!session) {
+        setIsUserTypeModalOpen(true)
+      }
+    })
+    
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleUserTypeSelection = (userType: 'client' | 'compliance') => {
-    localStorage.setItem('userTypeSelected', 'true')
+    // Simply close the modal when user makes a selection
+    // No localStorage needed - modal will show again on next visit if not logged in
     setIsUserTypeModalOpen(false)
     
     if (userType === 'compliance') {
